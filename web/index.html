@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<style>
+
+/* CSS goes here. */
+
+</style>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="http://d3js.org/topojson.v1.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script src="lz4.min.js"></script>
+
+
+</head>
+<body>
+
+<script>
+	
+	var Buffer = require('buffer').Buffer;
+	var LZ4 = require('lz4');
+	
+	var width = 1024,
+    	height = 768;
+
+	var svg = d3.select("body").append("svg")
+	    .attr("width", width)
+	    .attr("height", height);
+
+	$.ajax({
+		url:"topojson_100.json", 
+		success : function(ma_comp) {
+	  	
+	  		var comp = new Buffer(atob(ma_comp),'ascii' );
+			
+			var expectedSize = comp.length*2;
+			var uncompressed;
+			var uncompressedSize = expectedSize+1;
+			while (uncompressedSize>expectedSize) {
+				expectedSize = uncompressedSize; // second attempt will get correct size
+				uncompressed = new Buffer(expectedSize);
+				uncompressedSize = LZ4.decodeBlock(comp, uncompressed);
+			}
+			
+			uncompressed = uncompressed.slice(0, uncompressedSize);
+			var jsonData = $.parseJSON( uncompressed.toString() );
+		
+			var projection = d3.geo.mercator().scale(15000).center([-71.71, 42.2]);	
+		
+			svg.append("path")
+			  .datum(topojson.feature(jsonData, jsonData.objects.MA))
+			  .attr("d", d3.geo.path().projection(projection))
+			  .attr("stroke","black")
+		    	  .attr("stroke-width",1)
+			  .attr("fill","none");
+			  
+		},
+		dataType : "text"  
+	});
+			
+
+</script>
+
+
+</body>
