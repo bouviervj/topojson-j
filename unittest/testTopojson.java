@@ -113,10 +113,11 @@ public class testTopojson {
 		aDisplay.start();
 		aDisplay.clear();
 
-		Topology[][] aRes = TopojsonApi.tileShpToTopojson("./data/MA.shp", 8,8,
+		FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection("./data/MA.shp");
+		
+		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , 8,8,
 				"MA", 
-				10, 
-				4);
+				10);
 
 		aDisplay.setBound(aRes[0][0]._bnd);
 

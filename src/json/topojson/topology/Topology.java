@@ -40,7 +40,7 @@ public class Topology {
 		// Here we have to draw all arcs
 		for (java.lang.Object[][] arc:arcs) {
 			for (int i=0; i<arc.length-1; i++) {
-				if (((double) arc[i][0] != (double)arc[i+1][0]) &&
+				if (((double) arc[i][0] != (double)arc[i+1][0]) ||
 				     ((double) arc[i][1] != (double)arc[i+1][1])) {
 					iDisplay.drawLine((double) arc[i][0], (double)arc[i][1], (double)arc[i+1][0], (double)arc[i+1][1], Color.WHITE);
 				}

@@ -92,31 +92,31 @@ public class ShpFileReader {
 			// Bounding
 			// XMin
 			_stream.read(aDBuffer);
-			_groupRecord._bnd._Xmin = Toolbox.getDoubleFromByte(aDBuffer);
+			_groupRecord._bnd.minx = Toolbox.getDoubleFromByte(aDBuffer);
 			
 
 			// YMin
 			_stream.read(aDBuffer);
-			_groupRecord._bnd._Ymin = Toolbox.getDoubleFromByte(aDBuffer);
+			_groupRecord._bnd.miny = Toolbox.getDoubleFromByte(aDBuffer);
 			
 
-			Point2D.Double aRes = Toolbox.convertLatLong(_groupRecord._bnd._Xmin, _groupRecord._bnd._Ymin);
-			_groupRecord._bnd._Xmin = aRes.x;
-			_groupRecord._bnd._Ymin = aRes.y;
+			Point2D.Double aRes = Toolbox.convertLatLong(_groupRecord._bnd.minx, _groupRecord._bnd.miny);
+			_groupRecord._bnd.minx = aRes.x;
+			_groupRecord._bnd.miny = aRes.y;
 			
 			// XMax
 			_stream.read(aDBuffer);
-			_groupRecord._bnd._Xmax = Toolbox.getDoubleFromByte(aDBuffer);
+			_groupRecord._bnd.maxx = Toolbox.getDoubleFromByte(aDBuffer);
 			
 
 			// YMax
 			_stream.read(aDBuffer);
-			_groupRecord._bnd._Ymax = Toolbox.getDoubleFromByte(aDBuffer);
+			_groupRecord._bnd.maxy = Toolbox.getDoubleFromByte(aDBuffer);
 			
 
-			aRes = Toolbox.convertLatLong(_groupRecord._bnd._Xmax, _groupRecord._bnd._Ymax);
-			_groupRecord._bnd._Xmax = aRes.x;
-			_groupRecord._bnd._Ymax = aRes.y;
+			aRes = Toolbox.convertLatLong(_groupRecord._bnd.maxx, _groupRecord._bnd.maxy);
+			_groupRecord._bnd.maxx = aRes.x;
+			_groupRecord._bnd.maxy = aRes.y;
 			
 			/*
 			double swap;
@@ -126,10 +126,10 @@ public class ShpFileReader {
 				_groupRecord._bnd._Xmax = swap;
 			}*/
 			
-			System.out.println("xmin : "+_groupRecord._bnd._Xmin);
-			System.out.println("ymin : "+_groupRecord._bnd._Ymin);
-			System.out.println("xmax : "+_groupRecord._bnd._Xmax);
-			System.out.println("ymax : "+_groupRecord._bnd._Ymax);
+			System.out.println("xmin : "+_groupRecord._bnd.minx);
+			System.out.println("ymin : "+_groupRecord._bnd.miny);
+			System.out.println("xmax : "+_groupRecord._bnd.maxx);
+			System.out.println("ymax : "+_groupRecord._bnd.maxy);
 			
 			// ZMin
 			_stream.read(aDBuffer);

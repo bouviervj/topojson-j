@@ -5,19 +5,19 @@ import java.nio.ByteBuffer;
 
 public class Bounding {
 
-	public double _Xmin, _Ymin, _Xmax, _Ymax;
-	public int hash;
-	public Rectangle _rect;
+	public double minx, miny, maxx, maxy;
+	transient public int hash;
+	transient public Rectangle _rect;
 	
 	public Bounding(double Xmin, double Ymin, double Xmax, double Ymax){
 	
-		_Xmin = Xmin;
-		_Ymin = Ymin;
-		_Xmax = Xmax;
-		_Ymax = Ymax;
+		minx = Xmin;
+		miny = Ymin;
+		maxx = Xmax;
+		maxy = Ymax;
 		
-		hash = ByteBuffer.allocate(4*8).putDouble(_Xmin).putDouble(_Ymin)
-									   .putDouble(_Xmax).putDouble(_Xmax).hashCode();
+		hash = ByteBuffer.allocate(4*8).putDouble(minx).putDouble(miny)
+									   .putDouble(maxx).putDouble(maxx).hashCode();
 
 	}
 
@@ -27,23 +27,23 @@ public class Bounding {
 	}
 	
 	public boolean in(double X, double Y){
-		return (X>_Xmin) && (Y>_Ymin) && (X<_Xmax) && (Y<_Ymax);
+		return (X>minx) && (Y>miny) && (X<maxx) && (Y<maxy);
 	}
 	
 	public static boolean intersectRect(Bounding b1, Bounding b2, double iScale) {
 		
-		double vx = (b1._Xmax-b1._Xmin)*(iScale-1.0);
-		double vy = (b1._Ymax-b1._Ymin)*(iScale-1.0);
+		double vx = (b1.maxx-b1.minx)*(iScale-1.0);
+		double vy = (b1.maxy-b1.miny)*(iScale-1.0);
 		
-		double Xmax = b1._Xmax+vx;
-		double Xmin = b1._Xmin-vx;
-		double Ymax = b1._Ymax+vy;
-		double Ymin = b1._Ymin-vy;
+		double Xmax = b1.maxx+vx;
+		double Xmin = b1.minx-vx;
+		double Ymax = b1.maxy+vy;
+		double Ymin = b1.miny-vy;
 		
-		return !((b2._Xmin > (Xmax)) || 
-		           (b2._Xmax < (Xmin)) || 
-		           (b2._Ymin > (Ymax)) ||
-		           (b2._Ymax < (Ymin)));
+		return !((b2.minx > (Xmax)) || 
+		           (b2.maxx < (Xmin)) || 
+		           (b2.miny > (Ymax)) ||
+		           (b2.maxy < (Ymin)));
 	}
 	
 	public boolean partlyIn(Bounding iBnd){
@@ -57,19 +57,19 @@ public class Bounding {
 	}
 	
 	public String toJson(){
-		return "{ \"minx\" : "+_Xmin+" , \"miny\" : "+_Ymin+" , \"maxx\" : "+_Xmax+ " , \"maxy\" : "+_Ymax+" }";
+		return "{ \"minx\" : "+minx+" , \"miny\" : "+miny+" , \"maxx\" : "+maxx+ " , \"maxy\" : "+maxy+" }";
 	}
 	
 	public void merge(Bounding bnd){
-		if (bnd._Xmax>_Xmax) _Xmax = bnd._Xmax;
-		if (bnd._Ymax>_Ymax) _Ymax = bnd._Ymax;
-		if (bnd._Xmin<_Xmin) _Xmin = bnd._Xmin;
-		if (bnd._Ymin<_Ymin) _Ymin = bnd._Ymin;
+		if (bnd.maxx>maxx) maxx = bnd.maxx;
+		if (bnd.maxy>maxy) maxy = bnd.maxy;
+		if (bnd.minx<minx) minx = bnd.minx;
+		if (bnd.miny<miny) miny = bnd.miny;
 	}
 	
 	@Override
 	public Bounding clone(){
-		return new Bounding(_Xmin,_Ymin,_Xmax,_Ymax);
+		return new Bounding(minx,miny,maxx,maxy);
 	}
 	
 }

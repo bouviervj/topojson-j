@@ -56,6 +56,18 @@ public class TopojsonApi {
 		
 	}
 	
+	public static String getJson(Topology iTopology, boolean iCompress){
+		
+		Gson aGson = new Gson();
+		String aJson = aGson.toJson(iTopology);
+		
+		if (iCompress) {
+			return Compress.compressB64(aJson);
+		} 
+		return aJson;
+		
+	}
+	
 	public static String shpToTopojson(String iFileName, String iTopoName, int iKink, int iQuantizeDigit, boolean iCompress ) throws FileNotFoundException {
 		
 		Topology aTopology = shpToTopology(iFileName, iTopoName );
@@ -63,13 +75,7 @@ public class TopojsonApi {
 		if (iKink>0)aTopology.simplify(iKink);
 		if (iQuantizeDigit>0) aTopology.quantize(iQuantizeDigit);
 		
-		Gson aGson = new Gson();
-		String aJson = aGson.toJson(aTopology);
-		
-		if (iCompress) {
-			return Compress.compressB64(aJson);
-		} 
-		return aJson;
+		return getJson(aTopology,iCompress);
 		
 	}
 	
@@ -80,9 +86,9 @@ public class TopojsonApi {
 		
 	}
 	
-	public static Topology[][] tileShpToTopojson(String iFileNameInput, int iN, int iM, String iTopoName, int iKink, int iQuantizeDigit) throws FileNotFoundException{
+	public static Topology[][] tileFeatureCollectionToTopojson(FeatureCollection iCollection, int iN, int iM, String iTopoName, int iKink) throws FileNotFoundException{
 		
-		FeatureCollection aFeat = shpToGeojsonFeatureCollection(iFileNameInput);
+		FeatureCollection aFeat = iCollection;//shpToGeojsonFeatureCollection(iFileNameInput);
 		
 		List<Entity> aEntities = aFeat.extract();
 		Entity.join(aEntities);
@@ -134,6 +140,8 @@ public class TopojsonApi {
 				aTopology.setArcs(aNewMap);
 				
 				aTopology.setBound(aCollection.getBounding());
+				
+				if (iKink!=0) aTopology.simplify(iKink); // destructive
 				
 				aResult[i][j] = aTopology;
 				

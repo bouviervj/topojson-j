@@ -1,5 +1,6 @@
 import java.io.FileNotFoundException;
 
+import json.geojson.FeatureCollection;
 import json.graphic.Display;
 import json.graphic.DisplayListener;
 import json.topojson.api.TopojsonApi;
@@ -29,11 +30,13 @@ public class TilesTesting implements DisplayListener {
 		
 		try {
 			
-			_res = TopojsonApi.tileShpToTopojson(iFileName, 
+			FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection(iFileName);
+			
+			_res = TopojsonApi.tileFeatureCollectionToTopojson(aFeat, 
 					_N,_M,
 					"MA", 
-					1000, 
-					4);
+					10 // Simplify
+					);
 			
 			view();
 			

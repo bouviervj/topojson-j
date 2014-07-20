@@ -167,7 +167,7 @@ public class Polygon extends Shape {
 		}
 
 		//System.out.println("Reduced "+aPoints.length+"/"+_points.length);
-		return new Polygon(_bnd._Xmin, _bnd._Ymin, _bnd._Xmax, _bnd._Ymax, aResTab, aPoints );
+		return new Polygon(_bnd.minx, _bnd.miny, _bnd.maxx, _bnd.maxy, aResTab, aPoints );
 	}
 	
 	public Polygon reducePolygon(int iKink, int iMin){
@@ -301,7 +301,7 @@ public class Polygon extends Shape {
 			aP[i] = (Point) _points[i].clone();
 		}
 		
-		Polygon aPolygon = new Polygon(_bnd._Xmin, _bnd._Ymin, _bnd._Xmax, _bnd._Ymax,
+		Polygon aPolygon = new Polygon(_bnd.minx, _bnd.miny, _bnd.maxx, _bnd.maxy,
 									   _parts.clone(), aP);
 		aPolygon._entities = aEntities;
 		

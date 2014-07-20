@@ -18,20 +18,18 @@ public class Feature extends Shape {
 
 	int _recordId;
 	Shape _shape;
-	HashMap<String,String> _properties;
+	HashMap<String,java.lang.Object> _properties;
 	
 	public Feature(int iRecordId, Shape iShape){
 		
 		_recordId = iRecordId;
 		_shape = iShape;
-		_properties = null/*new HashMap<String,String>()*/;
+		_properties = new HashMap<String,java.lang.Object>();
+		_properties.put("bound", _shape.getBounding());
 		
 	}
 	
 	public void addProperty(String iName, String iData){
-		if (_properties==null) {
-			_properties = new HashMap<String,String>();
-		}
 		_properties.put(iName, iData);
 	}
 
@@ -42,7 +40,7 @@ public class Feature extends Shape {
 			Float afloat = Float.parseFloat(iData);
 			return String.format("%f",afloat);
 		} catch (NumberFormatException aEx ) {
-			System.err.println("Unabme to parse float");
+			System.err.println("Unable to parse float");
 		}
 		
 		try {
@@ -76,7 +74,7 @@ public class Feature extends Shape {
 				aBuffer.append("\"");
 				aBuffer.append(((String) aKeys[i]).replace("\"", ""));
 				aBuffer.append("\" :");
-				aBuffer.append(valid(_properties.get((String) aKeys[i])));
+				aBuffer.append(valid((String)_properties.get((String) aKeys[i])));
 				if (i!=aKeys.length-1) {
 					aBuffer.append(",");
 				}
@@ -133,7 +131,7 @@ public class Feature extends Shape {
 		// TODO Auto-generated method stub
 		Feature aFeat =  new Feature(_recordId, (Shape) _shape.clone());
 		if (_properties!=null) {
-			aFeat._properties = new HashMap<String,String>(_properties);
+			aFeat._properties = new HashMap<String,java.lang.Object>(_properties);
 		}
 		
 		return (Feature) aFeat;

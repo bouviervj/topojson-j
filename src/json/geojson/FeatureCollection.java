@@ -121,20 +121,20 @@ public class FeatureCollection extends Shape {
 		FeatureCollection[][] aDividedResult = new FeatureCollection[iN][iM];
 		//HashSet<Integer> aAlreadySelected = new HashSet<Integer>();
 		
-		double xStep = (_bnd._Xmax-_bnd._Xmin)/iN;
-		double yStep = (_bnd._Ymax-_bnd._Ymin)/iM;
+		double xStep = (_bnd.maxx-_bnd.minx)/iN;
+		double yStep = (_bnd.maxy-_bnd.miny)/iM;
 		
 		for (int i=0; i<iN; i++) {
 			
-			double aXmin = _bnd._Xmin + i*xStep;
-			double aXmax = _bnd._Xmin + (i+1)*xStep;
+			double aXmin = _bnd.minx + i*xStep;
+			double aXmax = _bnd.minx + (i+1)*xStep;
 			
 			for (int j=0; j<iM; j++) {
 			
 				FeatureCollection aGroupRecord = new FeatureCollection();
 				
-				double aYmin = _bnd._Ymin + j*yStep;
-				double aYmax = _bnd._Ymin + (j+1)*yStep;
+				double aYmin = _bnd.miny + j*yStep;
+				double aYmax = _bnd.miny + (j+1)*yStep;
 				
 				Bounding aBnd = new Bounding(aXmin,aYmin,aXmax,aYmax);
 				
@@ -225,7 +225,8 @@ public class FeatureCollection extends Shape {
 							// unable to convert this data
 						}
 						
-						aRecord.addProperty(aKV.getKey(), aKV.getValue());
+						String iKey = aKV.getKey().replace("\"", ""); // prevent inserting " in keys
+						aRecord.addProperty(iKey, aKV.getValue());
 						
 					}
 					

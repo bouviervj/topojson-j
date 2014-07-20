@@ -50,8 +50,8 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	
 	public void setBound(Bounding iBound){
 		_bound = iBound;
-		sx = (double) (_width/(iBound._Xmax-iBound._Xmin));
-		sy = (double) (_height/(iBound._Ymax-iBound._Ymin));
+		sx = (double) (_width/(iBound.maxx-iBound.minx));
+		sy = (double) (_height/(iBound.maxy-iBound.miny));
 		
 	}
 	
@@ -61,16 +61,16 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	
 	public void drawLine(double x1, double y1, double x2, double y2, Color iCol) {
 		bufferGraphics.setColor(iCol);
-		bufferGraphics.drawLine((int)((x1-_bound._Xmin)*sx), 
-								_height-(int)((y1-_bound._Ymin)*sy), 
-								(int)((x2-_bound._Xmin)*sx), 
-								_height-(int)((y2-_bound._Ymin)*sy));
+		bufferGraphics.drawLine((int)((x1-_bound.minx)*sx), 
+								_height-(int)((y1-_bound.miny)*sy), 
+								(int)((x2-_bound.minx)*sx), 
+								_height-(int)((y2-_bound.miny)*sy));
 	}
 	
 	public void drawPoint(double x1, double y1, int iSize, Color iCol) {
 		bufferGraphics.setColor(iCol);
-		bufferGraphics.fillRect((int)((x1-_bound._Xmin)*sx)-iSize, // factorize
-								_height-(int)((y1-_bound._Ymin)*sy)-iSize, 
+		bufferGraphics.fillRect((int)((x1-_bound.minx)*sx)-iSize, // factorize
+								_height-(int)((y1-_bound.miny)*sy)-iSize, 
 								2*iSize, 
 								2*iSize);
 	}
