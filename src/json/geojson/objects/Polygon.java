@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import json.algorithm.DouglasPeucker;
 import json.graphic.Display;
 import json.tools.Toolbox;
+import json.topojson.algorithm.ArcMap;
 import json.topojson.geom.Object;
 import json.topojson.geom.sub.Entity;
 import json.topojson.geom.sub.Ring;
@@ -95,19 +97,12 @@ public class Polygon extends Shape {
 				Xmax = swap;
 			}*/
 			
-			System.out.println("Xmin:"+Xmin);
-			System.out.println("Ymin:"+Ymin);
-			System.out.println("Xmax:"+Xmax);
-			System.out.println("Ymax:"+Ymax);
-			
 			iStream.read(aIBuffer);
 			int aNumparts = Toolbox.little2big(aIBuffer);
-			//System.out.println("num parts:"+aNumparts);
 			parts = new int[aNumparts];
 			
 			iStream.read(aIBuffer);
 			int aNumPoints = Toolbox.little2big(aIBuffer);
-			//System.out.println("num points:"+aNumPoints);
 			points = new Point[aNumPoints];
 			
 			for (int i=0; i<aNumparts; i++) {
@@ -291,6 +286,33 @@ public class Polygon extends Shape {
 	@Override
 	public json.topojson.geom.Object toTopology() {
 		return new json.topojson.geom.Polygon(_entities); 
+	}
+
+	@Override
+	public json.geojson.objects.Object clone() {
+		
+		Vector<Entity> aEntities = new Vector<Entity>();
+		for (Entity aEnt:_entities) {
+			aEntities.add(aEnt.clone());
+		}
+		
+		Point[] aP = new Point[_points.length];
+		for (int i=0;i<_points.length;i++){
+			aP[i] = (Point) _points[i].clone();
+		}
+		
+		Polygon aPolygon = new Polygon(_bnd._Xmin, _bnd._Ymin, _bnd._Xmax, _bnd._Ymax,
+									   _parts.clone(), aP);
+		aPolygon._entities = aEntities;
+		
+		return aPolygon;
+	}
+
+	@Override
+	public void rebuildIndexes(ArcMap iMap) {
+		for (Entity aEnt:_entities){
+			aEnt.rebuildIndexes(iMap);
+		}
 	}
 	
 

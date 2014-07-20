@@ -1,9 +1,8 @@
 package json.geojson.objects;
 
 import java.util.List;
-import java.util.Set;
 
-import json.graphic.Display;
+import json.topojson.algorithm.ArcMap;
 import json.topojson.geom.sub.Entity;
 
 public abstract class Shape extends Object {
@@ -15,5 +14,7 @@ public abstract class Shape extends Object {
 	public abstract int[] arcs();
 	
 	public abstract json.topojson.geom.Object toTopology();
+	
+	public abstract void rebuildIndexes(ArcMap iMap);
 	
 }

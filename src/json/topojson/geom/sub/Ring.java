@@ -66,6 +66,30 @@ public class Ring extends Entity {
 		
 	}
 
+	@Override
+	public Entity clone() {
+		
+		Position[] aP = new Position[_points.length];
+		for (int i=0; i<_points.length; i++){
+			aP[i] = (Position) _points[i].clone();
+		}
+		
+		Bounding aBnd = _bound.clone();
+		int[] aPat = _pattern.clone();
+		
+		Entity aEnt = new Ring(aP,aBnd);
+		aEnt._pattern = aPat;
+		
+		aEnt._indexes = new int[_indexes.length];
+		System.arraycopy(_indexes, 0, aEnt._indexes, 0, _indexes.length);
+		
+		// not cloning the ref
+		aEnt._ref = _ref;
+		
+		return aEnt;
+		
+	}
+
 	
 	
 }

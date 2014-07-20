@@ -26,7 +26,27 @@ public class Line extends Entity {
 		
 	}
 
-	
+	@Override
+	public Entity clone() {
+		
+		Position[] aP = new Position[_points.length];
+		for (int i=0; i<_points.length; i++){
+			aP[i] = (Position) _points[i].clone();
+		}
+		
+		Bounding aBnd = _bound.clone();
+		int[] aPat = _pattern.clone();
+		
+		Entity aEnt = new Ring(aP,aBnd);
+		aEnt._pattern = aPat;
+		aEnt._indexes = _indexes.clone();
+		
+		// not cloning the ref
+		aEnt._ref = _ref;
+		
+		return aEnt;
+		
+	}
 		
 
 }

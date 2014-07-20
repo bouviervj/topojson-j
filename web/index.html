@@ -3,7 +3,9 @@
 <head>
 <style>
 
-/* CSS goes here. */
+body {
+  background-color:#000;
+}
 
 </style>
 
@@ -12,24 +14,15 @@
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script src="lz4.min.js"></script>
 
-
-</head>
-<body>
-
 <script>
-	
+
 	var Buffer = require('buffer').Buffer;
-	var LZ4 = require('lz4');
-	
-	var width = 1024,
-    	height = 768;
+	var LZ4 = require('lz4');	
 
-	var svg = d3.select("body").append("svg")
-	    .attr("width", width)
-	    .attr("height", height);
+	function loadCompressedTopojson(iUrl, iObjectName, iFunction){
 
-	$.ajax({
-		url:"topojson_100.json", 
+		$.ajax({
+		url: iUrl, 
 		success : function(ma_comp) {
 	  	
 	  		var comp = new Buffer(atob(ma_comp),'ascii' );
@@ -46,21 +39,113 @@
 			uncompressed = uncompressed.slice(0, uncompressedSize);
 			var jsonData = $.parseJSON( uncompressed.toString() );
 		
-			var projection = d3.geo.mercator().scale(15000).center([-71.71, 42.2]);	
-		
-			svg.append("path")
-			  .datum(topojson.feature(jsonData, jsonData.objects.MA))
-			  .attr("d", d3.geo.path().projection(projection))
-			  .attr("stroke","black")
-		    	  .attr("stroke-width",1)
-			  .attr("fill","none");
-			  
+			iFunction(topojson.feature(jsonData, jsonData.objects[iObjectName]));
+			 
 		},
 		dataType : "text"  
 	});
-			
+
+
+	}
+	
+	function loadjson(svg, projection, filename){
+
+		loadCompressedTopojson(filename, "MA", function(datum){
+
+			svg.select("path").remove();
+			svg.append("path")
+			  .datum(datum)
+			  .attr("d", d3.geo.path().projection(projection))
+			  .attr("stroke","black")
+		    	  .attr("stroke-width",1)
+	          	  .attr("fill","none");
+		});
+
+	}
+	
+	var width = 1024,
+    	    height = 600;
+
+	$(function(){	
+
+		var svg = d3.select("#svg_data").append("svg")
+		    .attr("width", width)
+		    .attr("height", height);
+	
+		svg.append("rect")
+		   .attr("width", "100%")
+		   .attr("height", "100%")
+		   .attr("fill", "white");	
+
+		var projection = d3.geo.mercator().scale(15000).center([-71.71, 42.2]);	
+	
+		loadjson(svg, projection, "topojson_10000.json");
+		
+		$("#json100").click( function(){
+			loadjson(svg, projection, "topojson_100.json");
+		});
+
+		$("#json1000").click( function(){
+			loadjson(svg, projection, "topojson_1000.json");
+		});
+
+		$("#json10000").click( function(){
+			loadjson(svg, projection, "topojson_10000.json");
+		});
+		
+		$("#generate").click( function() {
+
+		 var html = d3.select("svg")
+			.attr("version", 1.1)
+			.attr("xmlns", "http://www.w3.org/2000/svg")
+			.node().parentNode.innerHTML;
+
+		 var imgsrc = 'data:image/svg+xml;base64,'+ btoa(html);
+		 var img = '<img src="'+imgsrc+'">';
+		 
+		 //d3.select("#image_save").html(img);
+
+		 var canvas = document.querySelector("canvas"),
+		     context = canvas.getContext("2d");
+			 
+	      	 var image = new Image();
+	         image.src = imgsrc;
+	         image.onload = function() {
+		
+			 context.drawImage(image, 0, 0);
+			 
+			 var canvasdata = canvas.toDataURL("image/png");
+			 
+			 var pngimg = '<img src="'+canvasdata+'">';
+			 d3.select("#image_save").html(pngimg);
+			 
+			 var a = document.createElement("a");
+			 a.download = "sample.png";
+			 a.href = canvasdata;
+			 a.click();
+			 	
+		 };
+
+		});	
+
+		$("canvas").hide();
+
+	});	
+	
+		
 
 </script>
 
+
+</head>
+<body>
+
+
+<div id="svg_data">
+</div>
+<button id="generate">generate image</button><button id="json100" >100</button><button id="json1000" >1000</button><button id="json10000">10000</button>
+<div id="image_save">
+</div>
+<canvas width="1024" height="600"></canvas> 
 
 </body>

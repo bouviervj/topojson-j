@@ -9,6 +9,7 @@ import json.geojson.objects.Bounding;
 import json.geojson.objects.Object;
 import json.geojson.objects.Shape;
 import json.graphic.Display;
+import json.topojson.algorithm.ArcMap;
 import json.topojson.geom.sub.Entity;
 
 
@@ -125,6 +126,22 @@ public class Feature extends Shape {
 		aObj.setId(_recordId);
 		aObj.setProperties(_properties);
 		return aObj;
+	}
+
+	@Override
+	public Object clone() {
+		// TODO Auto-generated method stub
+		Feature aFeat =  new Feature(_recordId, (Shape) _shape.clone());
+		if (_properties!=null) {
+			aFeat._properties = new HashMap<String,String>(_properties);
+		}
+		
+		return (Feature) aFeat;
+	}
+
+	@Override
+	public void rebuildIndexes(ArcMap iMap) {
+		_shape.rebuildIndexes(iMap);
 	}
 	
 	

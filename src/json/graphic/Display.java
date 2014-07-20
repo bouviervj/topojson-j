@@ -1,24 +1,31 @@
 package json.graphic;
 
+
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import json.geojson.objects.Bounding;
 
-public class Display extends Canvas implements Runnable {
+public class Display extends Canvas implements Runnable, KeyListener {
 
 	int _width;
 	int _height;
-	Image offscreen; 
+	BufferedImage offscreen; 
 	Graphics bufferGraphics;
-	
 	Bounding _bound;
 	double sx,sy;
+	
+	DisplayListener _listener;
 	
 	public Display(int iWidth, int iHeight)
 	{
@@ -28,10 +35,19 @@ public class Display extends Canvas implements Runnable {
 		
 		offscreen = new BufferedImage(_width,_height, BufferedImage.TYPE_4BYTE_ABGR);
 		bufferGraphics = offscreen.getGraphics();
+		
+		Graphics2D g2 = (Graphics2D) bufferGraphics;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+		                    RenderingHints.VALUE_ANTIALIAS_ON);
+		
 		clear();
 
 	}
 
+	public void setDisplayListener(DisplayListener iListener){
+		_listener = iListener;
+	}
+	
 	public void setBound(Bounding iBound){
 		_bound = iBound;
 		sx = (double) (_width/(iBound._Xmax-iBound._Xmin));
@@ -67,9 +83,12 @@ public class Display extends Canvas implements Runnable {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(this);                    
 		frame.setVisible(true);
+		
+		frame.addKeyListener(this);
 	}
 
 	public void start(){
+		init();
 		new Thread(this).start();
 	}
 	
@@ -85,7 +104,19 @@ public class Display extends Canvas implements Runnable {
 		paint(g);
 	} 
 
+	public void render(){
+		paint(this.getGraphics());
+	}
 
+	public void saveImage(String iFilename){
+		 try {
+		       ImageIO.write(offscreen, "png", new File(iFilename)); 
+		    } catch (java.io.IOException e) {
+		        // TODO Auto-generated catch block
+		        e.printStackTrace();
+		    }
+	}
+	
 	@Override
 	public void run() {
 
@@ -102,6 +133,38 @@ public class Display extends Canvas implements Runnable {
 
 		}
 
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		
+		//System.out.println("KeyCode "+e.getKeyCode());
+		//System.out.println("KeyChar "+e.getKeyChar());
+		//System.out.println("KeyExtended "+e.getExtendedKeyCode());
+		
+		if (_listener!=null) {
+			
+			switch (e.getKeyCode()) {
+			case 37: _listener.left(); break;
+			case 39: _listener.right(); break;
+			case 38: _listener.up(); break;
+			case 40: _listener.down(); break;
+			}
+			
+		}
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -11,6 +11,10 @@ public class EntryImp<K, V> implements Map.Entry<K, V> {
         this.value = value;
     }
 
+    public Object clone(){
+    	return new EntryImp<K,V>(key,value);
+    }
+    
     @Override
     public K getKey() {
         return key;

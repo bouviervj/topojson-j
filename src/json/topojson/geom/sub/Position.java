@@ -15,14 +15,18 @@ public class Position {
 	private final static double FACT = 10000000;
 	
 	public Position(double iX, double iY){
-		_x = Math.round(iX*FACT)/FACT;
-		_y = Math.round(iY*FACT)/FACT;
+		_x = iX;//Math.round(iX*FACT)/FACT;
+		_y = iY;//Math.round(iY*FACT)/FACT;
 		
 		byte[] aBuffer = new byte[8*2];
 		ByteBuffer.wrap(aBuffer).putDouble(_x).putDouble(_y);
 		
 		hash = Arrays.hashCode(aBuffer);
 		
+	}
+	
+	public Position clone(){
+		return new Position(_x,_y);
 	}
 	
 	@Override

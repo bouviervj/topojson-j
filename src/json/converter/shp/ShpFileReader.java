@@ -133,23 +133,23 @@ public class ShpFileReader {
 			
 			// ZMin
 			_stream.read(aDBuffer);
-			_groupRecord._Zmin = Toolbox.getDoubleFromByte(aDBuffer);
-			System.out.println("zmin : "+_groupRecord._Zmin);
+			//_groupRecord._Zmin = Toolbox.getDoubleFromByte(aDBuffer);
+			//System.out.println("zmin : "+_groupRecord._Zmin);
 
 			// ZMax
 			_stream.read(aDBuffer);
-			_groupRecord._Zmax = Toolbox.getDoubleFromByte(aDBuffer);
-			System.out.println("zmax : "+_groupRecord._Zmax);
+			//_groupRecord._Zmax = Toolbox.getDoubleFromByte(aDBuffer);
+			//System.out.println("zmax : "+_groupRecord._Zmax);
 
 			// MMin
 			_stream.read(aDBuffer);
-			_groupRecord._Mmin = Toolbox.getDoubleFromByte(aDBuffer);
-			System.out.println("mmin : "+_groupRecord._Mmin);
+			//_groupRecord._Mmin = Toolbox.getDoubleFromByte(aDBuffer);
+			//System.out.println("mmin : "+_groupRecord._Mmin);
 
 			// MMax
 			_stream.read(aDBuffer);
-			_groupRecord._Mmax = Toolbox.getDoubleFromByte(aDBuffer);
-			System.out.println("mmax : "+_groupRecord._Mmax);
+			//_groupRecord._Mmax = Toolbox.getDoubleFromByte(aDBuffer);
+			//System.out.println("mmax : "+_groupRecord._Mmax);
 
 			// here reading records
 
@@ -171,15 +171,15 @@ public class ShpFileReader {
 
 			// Here reading record header
 			int aRecordNumber = _stream.readInt();
-			System.out.println("Record # : "+aRecordNumber);
+			//System.out.println("Record # : "+aRecordNumber);
 
 			int aRecordSize = _stream.readInt();
-			System.out.println("Record Size : "+aRecordSize);
+			//System.out.println("Record Size : "+aRecordSize);
 
 			byte[] aIBuffer = new byte[4];
 			_stream.read(aIBuffer);
 			int aShapeType = Toolbox.little2big(aIBuffer);
-			System.out.println("Record Shape Type : "+giveShapeName(aShapeType));
+			//System.out.println("Record Shape Type : "+giveShapeName(aShapeType));
 			
 			Shape aReadShape = null;
 			switch (aShapeType) {

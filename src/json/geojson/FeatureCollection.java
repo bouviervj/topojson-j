@@ -17,6 +17,7 @@ import json.geojson.objects.Bounding;
 import json.geojson.objects.Shape;
 import json.graphic.Display;
 import json.tools.EntryImp;
+import json.topojson.algorithm.ArcMap;
 import json.topojson.geom.GeometryCollection;
 import json.topojson.geom.Object;
 import json.topojson.geom.sub.Entity;
@@ -33,9 +34,10 @@ public class FeatureCollection extends Shape {
 	public double _Xmin,_Xmax;
 	public double _Ymin,_Ymax;
 	*/
+	/*
 	public double _Zmin,_Zmax;
 	public double _Mmin,_Mmax;
-	
+	*/
 	
 	public TreeMap<Integer,Feature> _shapes;
 	
@@ -140,7 +142,7 @@ public class FeatureCollection extends Shape {
 				
 				for (Entry<Integer,Feature> aERec:_shapes.entrySet()) {
 					if (aERec.getValue().partlyIn(aBnd) /*&& (!aAlreadySelected.contains(aERec.getKey()))*/) {
-						aGroupRecord._shapes.put(aERec.getKey(), aERec.getValue());
+						aGroupRecord._shapes.put(aERec.getKey(), (Feature) aERec.getValue());
 						//aAlreadySelected.add(aERec.getKey());
 					}
 				}
@@ -266,7 +268,8 @@ public class FeatureCollection extends Shape {
 	public int[] arcs() {
 		int[] aAll= {};
 		for (Shape aShape:_shapes.values()) {
-			aAll = ArrayUtils.addAll(aAll, aShape.arcs());
+			int[] aArcs = aShape.arcs();
+			aAll = ArrayUtils.addAll(aAll, aArcs);
 		}
 		return aAll;
 	}
@@ -278,6 +281,33 @@ public class FeatureCollection extends Shape {
 			aGeoCol.addGeometry(aShape.toTopology());
 		}
 		return aGeoCol;
+	}
+
+	@Override
+	public json.geojson.objects.Object clone() {
+		
+		FeatureCollection aCollection = new FeatureCollection();
+		aCollection._shapeType = _shapeType;
+		aCollection._bnd = _bnd.clone();
+		aCollection._meta_properties = new HashMap<String,HashMap<String,String>>(aCollection._meta_properties);
+		
+		if (_minmax_properties!=null) {
+			aCollection._minmax_properties = new HashMap<String, EntryImp<Double,Double>>(_minmax_properties);
+		}
+		
+		for (Entry<Integer,Feature> aEnt:_shapes.entrySet()) {
+			
+			aCollection._shapes.put(aEnt.getKey(), (Feature) aEnt.getValue().clone());
+		}
+		
+		return aCollection;
+	}
+
+	@Override
+	public void rebuildIndexes(ArcMap iMap) {
+		for (Feature aEnt:_shapes.values()) {
+			aEnt.rebuildIndexes(iMap);
+		}
 	}
 
 }

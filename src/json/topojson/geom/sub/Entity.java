@@ -31,6 +31,15 @@ public abstract class Entity {
 		_pattern = new int[_points.length];
 	}
 	
+	public abstract Entity clone();
+	
+	public void rebuildIndexes(ArcMap iMap){
+		_ref = iMap;
+		for (int i=0; i<_indexes.length; i++){
+			_indexes[i] = iMap._rebuild.get(_indexes[i]);
+		}
+	}
+	
 	/**
 	 * Return Arcs indexes in ArcMap
 	 * @param iMap

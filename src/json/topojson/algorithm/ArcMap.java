@@ -1,5 +1,6 @@
 package json.topojson.algorithm;
 
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -11,6 +12,7 @@ public class ArcMap {
 	TreeMap<Integer,TreeMap<Integer,Vector<Arc>>> _listArcs;
 	public Vector<Arc> _arcs;
     int _shared;
+    public HashMap<Integer,Integer> _rebuild;
 	
 	public ArcMap(){
 		_listArcs = new TreeMap<Integer,TreeMap<Integer,Vector<Arc>>>();
@@ -77,5 +79,22 @@ public class ArcMap {
 			aArc.draw(iDisp);
 		}
 	}	
+	
+	public ArcMap rebuild(Integer[] iArcsToKeep) {
+		
+		HashMap<Integer,Integer> aRebuildIndexes = new HashMap<Integer,Integer>();
+		ArcMap aMap = new ArcMap();
+		
+		for (int i=0; i<iArcsToKeep.length; i++){
+			
+			int iIndex = iArcsToKeep[i]<0?-iArcsToKeep[i]-1:iArcsToKeep[i] ;
+			int iNewId = aMap.addArc(_arcs.get(iIndex));
+			aRebuildIndexes.put(iArcsToKeep[i],iArcsToKeep[i]<0?-(iNewId+1):iNewId);
+		}
+		
+		aMap._rebuild = aRebuildIndexes;
+		
+		return aMap;
+	}
 	
 }

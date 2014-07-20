@@ -1,6 +1,11 @@
 package json.tools;
 
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -35,5 +40,24 @@ public class Toolbox {
 	public static double getDoubleFromByte(byte[] aDoubleBuffer){
 		return ByteBuffer.wrap(aDoubleBuffer).order(ByteOrder.LITTLE_ENDIAN ).getDouble();
 	}
+	
+	public static void writeFile(String iFile, String iData){
+		
+		FileOutputStream aStream;
+		try {
+			aStream = new FileOutputStream(new File(iFile));
+			aStream.write(iData.getBytes());
+			aStream.flush();
+			aStream.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
 	
 }

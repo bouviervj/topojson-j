@@ -65,5 +65,10 @@ public class Point extends Object {
 		// TODO Auto-generated method stub
 		iDisp.drawPoint(x, y, 2, Color.RED);
 	}
+
+	@Override
+	public Object clone() {
+		return new Point(x,y);
+	}
 	
 }

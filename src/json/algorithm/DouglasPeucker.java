@@ -23,7 +23,7 @@ public class DouglasPeucker {
 	    double dev_sqr, max_dev_sqr, band_sqr;
 	    double x12, y12, d12, x13, y13, d13, x23, y23, d23;
 	    double F = ((Math.PI / 180.0) * 0.5 );
-	    int[] index = new int[source.length]; /* aray of indexes of source points to include in the reduced line */
+	    int[] index = new int[source.length]; /* array of indexes of source points to include in the reduced line */
 		int[] sig_start = new int[source.length]; /* indices of start & end of working section */
 	    int[] sig_end = new int[source.length];	
 

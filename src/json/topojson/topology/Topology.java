@@ -1,9 +1,12 @@
 package json.topojson.topology;
 
+import java.awt.Color;
 import java.util.HashMap;
 
 import json.algorithm.DouglasPeucker;
+import json.geojson.objects.Bounding;
 import json.geojson.objects.Point;
+import json.graphic.Display;
 import json.topojson.algorithm.ArcMap;
 import json.topojson.geom.Object;
 
@@ -14,6 +17,7 @@ public class Topology {
 	HashMap<String,Object> objects;
 	java.lang.Object[][][] arcs;
 	transient boolean _quantized;
+	public transient Bounding _bnd;
 	
 	public Topology(){
 		type = "Topology";
@@ -25,6 +29,24 @@ public class Topology {
 	public void addObject(String iName, Object iObject){
 		if (objects==null) objects = new HashMap<String,Object>();
 		objects.put(iName, iObject);
+	}
+	
+	public void setBound(Bounding iBound){
+		_bnd = iBound;
+	}
+	
+	public void draw(Display iDisplay){
+		
+		// Here we have to draw all arcs
+		for (java.lang.Object[][] arc:arcs) {
+			for (int i=0; i<arc.length-1; i++) {
+				if (((double) arc[i][0] != (double)arc[i+1][0]) &&
+				     ((double) arc[i][1] != (double)arc[i+1][1])) {
+					iDisplay.drawLine((double) arc[i][0], (double)arc[i][1], (double)arc[i+1][0], (double)arc[i+1][1], Color.WHITE);
+				}
+			}
+		}
+		
 	}
 	
 	public void setArcs(ArcMap iArcMap){
