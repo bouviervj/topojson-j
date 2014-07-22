@@ -36,18 +36,23 @@ public class Topology {
 	}
 	
 	public void draw(Display iDisplay){
+		draw(0,0, iDisplay);
+	}
+	
+	public void draw(double tx, double ty, Display iDisplay){
 		
 		// Here we have to draw all arcs
 		for (java.lang.Object[][] arc:arcs) {
 			for (int i=0; i<arc.length-1; i++) {
 				if (((double) arc[i][0] != (double)arc[i+1][0]) ||
 				     ((double) arc[i][1] != (double)arc[i+1][1])) {
-					iDisplay.drawLine((double) arc[i][0], (double)arc[i][1], (double)arc[i+1][0], (double)arc[i+1][1], Color.WHITE);
+					iDisplay.drawLine(tx+(double) arc[i][0], ty+(double)arc[i][1], tx+(double)arc[i+1][0], ty+(double)arc[i+1][1], Color.WHITE);
 				}
 			}
 		}
 		
 	}
+	
 	
 	public void setArcs(ArcMap iArcMap){
 		

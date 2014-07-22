@@ -46,6 +46,18 @@ public class Bounding {
 		           (b2.maxy < (Ymin)));
 	}
 	
+	public void scale(double iScale){
+		
+		double vx = (maxx-minx)*(iScale-1.0);
+		double vy = (maxy-miny)*(iScale-1.0);
+		
+		maxx = maxx+vx;
+		minx = minx-vx;
+		maxy = maxy+vy;
+		miny = miny-vy;
+		
+	}
+	
 	public boolean partlyIn(Bounding iBnd){
 		return /*iBnd.in(_Xmin, _Ymin) || iBnd.in(_Xmax, _Ymax)
 			|| iBnd.in(_Xmax, _Ymin) || iBnd.in(_Xmin, _Ymax)*/ intersectRect(this, iBnd, 1.0);	   
