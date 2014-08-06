@@ -17,6 +17,10 @@ public class Topology {
 	HashMap<String,Object> objects;
 	java.lang.Object[][][] arcs;
 	transient boolean _quantized;
+	
+	transient boolean _notsaved;
+	transient java.lang.Object[][][] _saved_arcs;
+	
 	public transient Bounding _bnd;
 	
 	public Topology(){
@@ -24,6 +28,7 @@ public class Topology {
 		transform = null;
 		arcs = null;
 		_quantized = false;
+		_notsaved = true;
 	}
 	
 	public void addObject(String iName, Object iObject){
@@ -44,9 +49,9 @@ public class Topology {
 		// Here we have to draw all arcs
 		for (java.lang.Object[][] arc:arcs) {
 			for (int i=0; i<arc.length-1; i++) {
-				if (((double) arc[i][0] != (double)arc[i+1][0]) ||
-				     ((double) arc[i][1] != (double)arc[i+1][1])) {
-					iDisplay.drawLine(tx+(double) arc[i][0], ty+(double)arc[i][1], tx+(double)arc[i+1][0], ty+(double)arc[i+1][1], Color.WHITE);
+				if (((Double) arc[i][0] != (Double)arc[i+1][0]) ||
+				     ((Double) arc[i][1] != (Double)arc[i+1][1])) {
+					iDisplay.drawLine(tx+(Double) arc[i][0], ty+(Double)arc[i][1], tx+(Double)arc[i+1][0], ty+(Double)arc[i+1][1], Color.WHITE);
 				}
 			}
 		}
@@ -90,6 +95,14 @@ public class Topology {
 	
 	public void simplify(int iFact){
 		
+		if (_notsaved) {
+			_saved_arcs = arcs;
+			_notsaved = false;
+		} else {
+			arcs = _saved_arcs;
+		}
+		
+		java.lang.Object[][][] tmp_arcs = new java.lang.Object[arcs.length][][];
 		
 		for (int i=0; i<arcs.length; i++){
 			
@@ -104,17 +117,19 @@ public class Topology {
 			aPs = DouglasPeucker.GDouglasPeucker(aPs, iFact);
 			
 			n=0;
-			arcs[i] = new java.lang.Object[aPs.length][];
+			tmp_arcs[i] = new java.lang.Object[aPs.length][];
 			for (int j=0; j<aPs.length; j++){
 				
-				arcs[i][j] = new java.lang.Object[2];
-				arcs[i][j][0] = (Double) aPs[j].x;
-				arcs[i][j][1] = (Double) aPs[j].y; 
+				tmp_arcs[i][j] = new java.lang.Object[2];
+				tmp_arcs[i][j][0] = (Double) aPs[j].x;
+				tmp_arcs[i][j][1] = (Double) aPs[j].y; 
 				
 			}
 			
 		}
 		
+		arcs = tmp_arcs;
+
 	}
 	
 	public void quantize(double iPowTen){

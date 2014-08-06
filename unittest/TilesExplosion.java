@@ -2,6 +2,7 @@ import java.io.FileNotFoundException;
 
 import json.geojson.FeatureCollection;
 import json.graphic.Display;
+import json.topojson.algorithm.ArcMap;
 import json.topojson.api.TopojsonApi;
 import json.topojson.topology.Topology;
 
@@ -40,10 +41,11 @@ public class TilesExplosion {
 			aFeat._bnd.scale(1.9);
 			_display.setBound(aFeat._bnd);
 			
-			_res = TopojsonApi.tileFeatureCollectionToTopojson(aFeat, 
+			ArcMap aMap = TopojsonApi.joinCollection(aFeat);
+			
+			_res = TopojsonApi.tileFeatureCollectionToTopojson(aFeat, aMap,
 					_N,_M,
-					"MA", 
-					10000 // Simplify
+					"MA"
 					);
 			
 			double CX=(aFeat._bnd.maxx+aFeat._bnd.minx)/2;
@@ -54,6 +56,7 @@ public class TilesExplosion {
 				for (int j=0; j<_M; j++) {
 					
 					Topology aTopo = _res[i][j];
+					aTopo.simplify(10000);
 					
 					double CPX = (aTopo._bnd.maxx+aTopo._bnd.minx)/2;
 					double CPY = (aTopo._bnd.maxy+aTopo._bnd.miny)/2;

@@ -86,8 +86,7 @@ public class TopojsonApi {
 		
 	}
 	
-	public static Topology[][] tileFeatureCollectionToTopojson(FeatureCollection iCollection, int iN, int iM, String iTopoName, int iKink) throws FileNotFoundException{
-		
+	public static ArcMap joinCollection(FeatureCollection iCollection){
 		FeatureCollection aFeat = iCollection;//shpToGeojsonFeatureCollection(iFileNameInput);
 		
 		List<Entity> aEntities = aFeat.extract();
@@ -101,6 +100,14 @@ public class TopojsonApi {
 		for (Entity aEntity:aEntities){
 			aEntity.cut(aMap);
 		}
+		
+		return aMap;
+	}
+	
+	public static Topology[][] tileFeatureCollectionToTopojson(FeatureCollection iCollection, ArcMap iMap, int iN, int iM, String iTopoName) throws FileNotFoundException{
+		
+		FeatureCollection aFeat = iCollection;
+		ArcMap aMap = iMap;
 		
 		// Here the grid contains feature collections with references 
 		// to same arcs indexes i.e. indexes are not following
@@ -141,7 +148,7 @@ public class TopojsonApi {
 				
 				aTopology.setBound(aCollection.getBounding());
 				
-				if (iKink!=0) aTopology.simplify(iKink); // destructive
+				//if (iKink!=0) aTopology.simplify(iKink); // destructive
 				
 				aResult[i][j] = aTopology;
 				

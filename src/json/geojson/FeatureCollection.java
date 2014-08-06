@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import json.algorithm.Jenks;
 import json.converter.csv.CSVReader;
 import json.geojson.objects.Bounding;
 import json.geojson.objects.Shape;
@@ -159,10 +160,23 @@ public class FeatureCollection extends Shape {
 
 				}
 				aBuf.append(", \"serie\" : [ ");
+				
+				// comput Jenks
+				
 				List<Double> aList = _minmax_properties_series.get(aKeys[i]);
+				double[] aSerie = new double[aList.size()];
 				for (int j=0; j<aList.size(); j++) {
-					aBuf.append(String.format("%.2f", aList.get(j)));
-					if (j!=aList.size()-1) aBuf.append(",");
+					aSerie[j] = aList.get(j);
+					//aBuf.append(String.format("%.2f", aList.get(j)));
+					//if (j!=aList.size()-1) aBuf.append(",");
+				}
+				
+				double[] aResult = Jenks.computeJenks(5, aSerie);
+				
+				//List<Double> aList = _minmax_properties_series.get(aKeys[i]);
+				for (int j=0; j<aResult.length; j++) {
+					aBuf.append(String.format("%.2f", aResult[j]));
+					if (j!=aResult.length-1) aBuf.append(",");
 				}
 				aBuf.append("] ");
 				aBuf.append("}");

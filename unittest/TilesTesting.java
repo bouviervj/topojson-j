@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import json.geojson.FeatureCollection;
 import json.graphic.Display;
 import json.graphic.DisplayListener;
+import json.topojson.algorithm.ArcMap;
 import json.topojson.api.TopojsonApi;
 import json.topojson.topology.Topology;
 
@@ -32,10 +33,11 @@ public class TilesTesting implements DisplayListener {
 			
 			FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection(iFileName);
 			
-			_res = TopojsonApi.tileFeatureCollectionToTopojson(aFeat, 
+			ArcMap aMap = TopojsonApi.joinCollection(aFeat);
+			
+			_res = TopojsonApi.tileFeatureCollectionToTopojson(aFeat, aMap,
 					_N,_M,
-					"MA", 
-					10 // Simplify
+					"MA"
 					);
 			
 			view();
@@ -51,6 +53,7 @@ public class TilesTesting implements DisplayListener {
 		
 		_display.clear();
 		_display.setBound(_res[_C_N][_C_M]._bnd);
+		_res[_C_N][_C_M].simplify(10);
 		_res[_C_N][_C_M].draw(_display);
 		_display.render();
 		

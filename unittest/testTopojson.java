@@ -115,9 +115,10 @@ public class testTopojson {
 
 		FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection("./data/MA.shp");
 		
-		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , 8,8,
-				"MA", 
-				10);
+		ArcMap aMap = TopojsonApi.joinCollection(aFeat);
+		
+		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  8,8,
+				"MA");
 
 		aDisplay.setBound(aRes[0][0]._bnd);
 

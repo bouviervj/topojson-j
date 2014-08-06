@@ -16,7 +16,7 @@
     	</fileset>
     </path>
        
-    <javac debug="false" debuglevel="lines,vars,source" srcdir="${src}" destdir="${build}">
+    <javac target='1.6' source='1.6' debug="false" debuglevel="lines,vars,source" srcdir="${src}" destdir="${build}">
            <classpath refid="classpath"/>
     </javac>
        
