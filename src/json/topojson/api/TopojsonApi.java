@@ -13,8 +13,10 @@ import javax.xml.bind.DatatypeConverter;
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
 
+import json.converter.merger.Merger;
 import json.converter.shp.ShpFileReader;
 import json.geojson.FeatureCollection;
+import json.geojson.objects.Bounding;
 import json.tools.Compress;
 import json.tools.Toolbox;
 import json.topojson.algorithm.ArcMap;
@@ -25,18 +27,28 @@ import com.google.gson.Gson;
 
 public class TopojsonApi {
 
-	public static FeatureCollection shpToGeojsonFeatureCollection(String iFileName) throws FileNotFoundException {
+	public static FeatureCollection shpToGeojsonFeatureCollection(String iFileName, String iCoordinateSystem, String[][] iFilter , Merger iMerger) throws IOException {
 		
-		ShpFileReader aReader = new ShpFileReader(iFileName);
+		ShpFileReader aReader = new ShpFileReader(iFileName, iCoordinateSystem, iFilter);
+		aReader.mergeWithAssociation(iMerger);
 		aReader.read();
-		
+		FeatureCollection aFeat = aReader.getGroupRecord();
+		aFeat._bnd = aFeat.getMergedBound();	
 		return aReader.getGroupRecord();
 		
 	}
 	
-	public static Topology shpToTopology(String iFileName, String iTopoName ) throws FileNotFoundException {
+	public static FeatureCollection shpToGeojsonFeatureCollection(String iFileName, String iCoordinateSystem ) throws IOException {
 		
-		FeatureCollection aFeat = shpToGeojsonFeatureCollection(iFileName);
+		ShpFileReader aReader = new ShpFileReader(iFileName, iCoordinateSystem);
+		aReader.read();
+		return aReader.getGroupRecord();
+		
+	}
+	
+	public static Topology shpToTopology(String iFileName, String iCoordinateSystem, String iTopoName ) throws IOException {
+		
+		FeatureCollection aFeat = shpToGeojsonFeatureCollection(iFileName, iCoordinateSystem);
 		
 		List<Entity> aEntities = aFeat.extract();
 		Entity.join(aEntities);
@@ -68,9 +80,9 @@ public class TopojsonApi {
 		
 	}
 	
-	public static String shpToTopojson(String iFileName, String iTopoName, int iKink, int iQuantizeDigit, boolean iCompress ) throws FileNotFoundException {
+	public static String shpToTopojson(String iFileName, String iCoordinateSystem, String iTopoName, int iKink, int iQuantizeDigit, boolean iCompress ) throws IOException {
 		
-		Topology aTopology = shpToTopology(iFileName, iTopoName );
+		Topology aTopology = shpToTopology(iFileName, iCoordinateSystem, iTopoName );
 		
 		if (iKink>0)aTopology.simplify(iKink);
 		if (iQuantizeDigit>0) aTopology.quantize(iQuantizeDigit);
@@ -79,9 +91,9 @@ public class TopojsonApi {
 		
 	}
 	
-	public static void shpToTopojsonFile(String iFileNameInput, String iFileOuput, String iTopoName, int iKink, int iQuantizeDigit, boolean iCompress ) throws FileNotFoundException {
+	public static void shpToTopojsonFile(String iFileNameInput, String iCoordinateSystem,  String iFileOuput, String iTopoName, int iKink, int iQuantizeDigit, boolean iCompress ) throws IOException {
 		
-		String aJson = shpToTopojson( iFileNameInput , iTopoName, iKink,  iQuantizeDigit, iCompress );
+		String aJson = shpToTopojson( iFileNameInput , iCoordinateSystem,  iTopoName, iKink,  iQuantizeDigit, iCompress );
 		Toolbox.writeFile(iFileOuput, aJson);
 		
 	}
@@ -104,7 +116,7 @@ public class TopojsonApi {
 		return aMap;
 	}
 	
-	public static Topology[][] tileFeatureCollectionToTopojson(FeatureCollection iCollection, ArcMap iMap, int iN, int iM, String iTopoName) throws FileNotFoundException{
+	public static Topology[][] tileFeatureCollectionToTopojson(FeatureCollection iCollection, ArcMap iMap, int iZoom, String iTopoName) throws FileNotFoundException{
 		
 		FeatureCollection aFeat = iCollection;
 		ArcMap aMap = iMap;
@@ -112,7 +124,10 @@ public class TopojsonApi {
 		// Here the grid contains feature collections with references 
 		// to same arcs indexes i.e. indexes are not following
 		// All the work consists in rebuilding own arc maps and indexes
-		FeatureCollection[][] aGrid = aFeat.groupGridDivide(iN, iM);
+		FeatureCollection[][] aGrid = aFeat.groupGridDivide(iZoom);
+		
+		int iN = aGrid.length;
+		int iM = aGrid[0].length;
 		
 		// build result array
 		Topology[][] aResult = new Topology[iN][];

@@ -1,5 +1,10 @@
 package json.topojson.geom;
 
+import java.awt.Color;
+
+import json.graphic.Display;
+import json.topojson.topology.Topology;
+
 public abstract class Object {
 
 	Integer id;
@@ -14,6 +19,14 @@ public abstract class Object {
 		properties = iProperties;
 	}
 	
+	public java.lang.Object getProperties(){
+		return properties;
+	}
+	
 	public abstract int findMaxArcIndex();
+	
+	public abstract void fill(Topology iTopo, Display iDisplay, Color iColor );
+	
+	
 	
 }

@@ -39,6 +39,7 @@ public class Point extends Object {
 			X = aRes.x;
 			Y = aRes.y;
 			
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

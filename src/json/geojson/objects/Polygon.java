@@ -89,13 +89,19 @@ public class Polygon extends Shape {
 			Xmax = aRes.x;
 			Ymax = aRes.y;
 			
-			/*
+			
 			double swap;
 			if (Xmin>Xmax) {
 				swap = Xmin;
 				Xmin = Xmax;
 				Xmax = swap;
-			}*/
+			}
+			
+			if (Ymin>Ymax) {
+				swap = Ymin;
+				Ymin = Ymax;
+				Ymax = swap;
+			}
 			
 			iStream.read(aIBuffer);
 			int aNumparts = Toolbox.little2big(aIBuffer);
@@ -112,6 +118,13 @@ public class Polygon extends Shape {
 			
 			for (int i=0; i<aNumPoints; i++) {
 				points[i] = Point.readPoint(iStream);
+				
+				if (points[i].x>Xmax) Xmax = points[i].x;
+				if (points[i].x<Xmin) Xmin = points[i].x;
+				
+				if (points[i].y>Ymax) Ymax = points[i].y;
+				if (points[i].y<Ymin) Ymin = points[i].y;
+				
 			}
 			
 		} catch (IOException e) {

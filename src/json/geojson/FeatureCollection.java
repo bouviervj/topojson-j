@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import json.algorithm.Jenks;
 import json.converter.csv.CSVReader;
 import json.geojson.objects.Bounding;
+import json.geojson.objects.Bounding.Tile;
 import json.geojson.objects.Shape;
 import json.graphic.Display;
 import json.tools.EntryImp;
@@ -192,34 +194,45 @@ public class FeatureCollection extends Shape {
 
 	}
 
-	public FeatureCollection[][] groupGridDivide(int iN, int iM){
+	
+	// Divide a feature collection in standard tiles based onn openstreetmap definition
+	
+	public FeatureCollection[][] groupGridDivide(int iZoom/*int iN, int iM*/){
 
-		FeatureCollection[][] aDividedResult = new FeatureCollection[iN][iM];
-		//HashSet<Integer> aAlreadySelected = new HashSet<Integer>();
+		Tile aMinTile = Bounding.getTileNumber(_bnd.miny, /* lon*/_bnd.minx,  iZoom);
+		Tile aMaxTile = Bounding.getTileNumber( _bnd.maxy, /*lon*/_bnd.maxx, iZoom);
+		
+		System.out.println("Max:"+_bnd.maxx+","+_bnd.maxy);
+		System.out.println("Min:"+_bnd.minx+","+_bnd.miny);
+		
+		int aN = aMaxTile.x-aMinTile.x;
+		int aM = aMaxTile.y-aMinTile.y;
+		
+		System.out.println("N:"+aN);
+		System.out.println("M:"+aM);
+		
+		int aSN = aN<0?-1:+1;
+		int aSM = aM<0?-1:+1;
+		
+		aN = Math.abs(aN)+1;
+		aM = Math.abs(aM)+1;
+		
+		FeatureCollection[][] aDividedResult = new FeatureCollection[aN][aM];
 
-		double xStep = (_bnd.maxx-_bnd.minx)/iN;
-		double yStep = (_bnd.maxy-_bnd.miny)/iM;
+		for (int i=0; i<aN; i++) {
 
-		for (int i=0; i<iN; i++) {
-
-			double aXmin = _bnd.minx + i*xStep;
-			double aXmax = _bnd.minx + (i+1)*xStep;
-
-			for (int j=0; j<iM; j++) {
+			for (int j=0; j<aM; j++) {
 
 				FeatureCollection aGroupRecord = new FeatureCollection();
 
-				double aYmin = _bnd.miny + j*yStep;
-				double aYmax = _bnd.miny + (j+1)*yStep;
-
-				Bounding aBnd = new Bounding(aXmin,aYmin,aXmax,aYmax);
-
+				Bounding aBnd = Bounding.tile2boundingBox(aMinTile.x+aSN*i ,aMinTile.y+aSM*j , iZoom);
 				aGroupRecord._bnd = aBnd;
+				
+				//System.out.println(aBnd.toJson());
 
 				for (Entry<Integer,Feature> aERec:_shapes.entrySet()) {
 					if (aERec.getValue().partlyIn(aBnd) /*&& (!aAlreadySelected.contains(aERec.getKey()))*/) {
 						aGroupRecord._shapes.put(aERec.getKey(), (Feature) aERec.getValue());
-						//aAlreadySelected.add(aERec.getKey());
 					}
 				}
 
@@ -263,7 +276,7 @@ public class FeatureCollection extends Shape {
 			_meta_properties.put(iAccepted[i], aMap);
 		}
 
-		for (Entry<Integer,TreeMap<String,String>> aEntry : aReader._data.entrySet()){
+		for (Entry<Integer,LinkedHashMap<String,String>> aEntry : aReader._data.entrySet()){
 
 			String aValue = aEntry.getValue().get(iCol);
 			Integer aIntValue = new Integer(aValue);
@@ -340,11 +353,16 @@ public class FeatureCollection extends Shape {
 	}
 
 	public Bounding getMergedBound(){
-		Bounding aSt = _shapes.firstEntry().getValue().getBounding();
-		for (Shape aShape:_shapes.values()) {
-			aSt.merge(aShape.getBounding());
+		
+		if (_shapes.size()>0) {
+			Bounding aSt = _shapes.firstEntry().getValue().getBounding();
+			for (Shape aShape:_shapes.values()) {
+				aSt.merge(aShape.getBounding());
+			}
+			return aSt;
 		}
-		return aSt;
+		
+		return null;
 	}
 
 

@@ -2,11 +2,13 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import javax.imageio.ImageIO;
 
 
+import json.converter.csv.CSVReader;
 import json.converter.shp.ShpFileReader;
 import json.geojson.FeatureCollection;
 import json.graphic.Display;
@@ -26,11 +28,11 @@ import com.google.gson.Gson;
 public class testTopojson {
 
 	@Test
-	public void test() throws FileNotFoundException {
+	public void test() throws IOException {
 
 		for (int i=0; i<6; i++) {
 			int aVal = (int) Math.pow(10, i);
-			TopojsonApi.shpToTopojsonFile("./data/MA.shp", 
+			TopojsonApi.shpToTopojsonFile("./data/MA.shp", "nad83:2001",
 					"./web/topojson_"+aVal+".json", 
 					"MA", 
 					aVal, 
@@ -39,11 +41,41 @@ public class testTopojson {
 		}
 
 	}
+	
+	@Test
+	public void testAssociation() throws IOException {
+
+			String[][] aFilter = {{"STATEA", "25" }};
+			
+			CSVReader aExtReader = new CSVReader("./data/US_NHGIS_2000.csv");
+			aExtReader.read();
+			ShpFileReader aReader = new ShpFileReader("./data/US.shp", "esri:102003", aFilter);
+			aReader.mergeWithAssociation("GISJOIN",aExtReader, "GISJOIN");
+			aReader.read();
+			
+			Display aDisplay = new Display(1024, 600);
+			aDisplay.start();
+			aDisplay.clear();
+
+			FeatureCollection aFeat = aReader.getGroupRecord();
+			
+			ArcMap aMap = TopojsonApi.joinCollection(aFeat);
+			
+			Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  14,
+					"MA");
+
+			aDisplay.setBound(aRes[0][0]._bnd);
+
+
+			aRes[5][5].draw(aDisplay);
+			aDisplay.render();
+		
+	}
 
 	@Test
-	public void testDecompress() throws FileNotFoundException {
+	public void testDecompress() throws IOException {
 
-		String iJsonC = TopojsonApi.shpToTopojson("./data/MA.shp", 
+		String iJsonC = TopojsonApi.shpToTopojson("./data/MA.shp", "nad83:2001",
 				"MA", 
 				10, 
 				4, 
@@ -63,10 +95,10 @@ public class testTopojson {
 	}
 
 	@Test
-	public void createAnim() throws FileNotFoundException {
+	public void createAnim() throws IOException {
 
 
-		ShpFileReader aReader = new ShpFileReader("./data/MA.shp");
+		ShpFileReader aReader = new ShpFileReader("./data/US.shp", "esri:102003");
 		aReader.read();
 
 		FeatureCollection aCollection = aReader.getGroupRecord();
@@ -95,7 +127,7 @@ public class testTopojson {
 
 			aTopology.setArcs(aMap);
 
-			aTopology.simplify(10+i*aStep);
+			aTopology.simplify(10/*+i*aStep*/);
 
 			aDisplay.clear();
 			aTopology.draw(aDisplay);
@@ -107,17 +139,17 @@ public class testTopojson {
 	}
 
 	@Test
-	public void testTile() throws FileNotFoundException {
+	public void testTile() throws IOException {
 
 		Display aDisplay = new Display(1024, 600);
 		aDisplay.start();
 		aDisplay.clear();
 
-		FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection("./data/MA.shp");
+		FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection("./data/MA.shp", "esri:102003");
 		
 		ArcMap aMap = TopojsonApi.joinCollection(aFeat);
 		
-		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  8,8,
+		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  14,
 				"MA");
 
 		aDisplay.setBound(aRes[0][0]._bnd);

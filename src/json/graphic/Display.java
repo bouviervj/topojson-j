@@ -108,6 +108,25 @@ public class Display extends Canvas implements Runnable, KeyListener {
 		paint(this.getGraphics());
 	}
 
+	
+	public void fillPolygons(double[] x, double[] y, int length, Color color){
+		
+		int[] px = new int[length];
+		int[] py = new int[length];
+		
+		for (int i=0; i<length; i++){
+			
+			px[i] = (int)((x[i]-_bound.minx)*sx);
+			py[i] = _height-(int)((y[i]-_bound.miny)*sy);
+			
+		}
+		
+		bufferGraphics.setColor(color);
+		bufferGraphics.fillPolygon(px, py, length);
+		
+	}
+	
+	
 	public void saveImage(String iFilename){
 		 try {
 		       ImageIO.write(offscreen, "png", new File(iFilename)); 

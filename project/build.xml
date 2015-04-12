@@ -40,6 +40,10 @@
 	    </manifest>
 	    
         <fileset dir="${build}" />
+        
+        <zipgroupfileset
+										dir="${lib}/"
+										includes="**/*.jar" />
        
     </jar>
   </target>

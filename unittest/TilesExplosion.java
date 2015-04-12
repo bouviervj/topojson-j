@@ -1,4 +1,5 @@
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import json.geojson.FeatureCollection;
 import json.graphic.Display;
@@ -14,10 +15,7 @@ public class TilesExplosion {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		
-		int iN = 16;
-		int iM = 16;
-		
+			
 		Topology[][] _res;
 		int _N, _C_N;
 		int _M, _C_M;
@@ -27,16 +25,10 @@ public class TilesExplosion {
 		_display.start();
 		_display.clear();
 		//_display.setDisplayListener(this);
-
-		_N = iN;
-		_M = iM;
-		
-		_C_N = iN/2;
-		_C_M = iM/2;
-		
+	
 		try {
 			
-			FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection("./data/MA.shp");
+			FeatureCollection aFeat = TopojsonApi.shpToGeojsonFeatureCollection("./data/MA.shp", "esri:102003");
 			
 			aFeat._bnd.scale(1.9);
 			_display.setBound(aFeat._bnd);
@@ -44,9 +36,18 @@ public class TilesExplosion {
 			ArcMap aMap = TopojsonApi.joinCollection(aFeat);
 			
 			_res = TopojsonApi.tileFeatureCollectionToTopojson(aFeat, aMap,
-					_N,_M,
+					14,
 					"MA"
 					);
+			
+			int iN = _res.length;
+			int iM = _res[0].length;
+			
+			_N = iN;
+			_M = iM;
+			
+			_C_N = iN/2;
+			_C_M = iM/2;
 			
 			double CX=(aFeat._bnd.maxx+aFeat._bnd.minx)/2;
 			double CY=(aFeat._bnd.maxy+aFeat._bnd.miny)/2;
@@ -71,7 +72,7 @@ public class TilesExplosion {
 				
 			}
 			
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

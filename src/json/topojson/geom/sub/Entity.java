@@ -125,7 +125,7 @@ public abstract class Entity {
 			
 			
 			count++;
-			System.out.println("Match bound:"+match_bound+" found:"+aJoinPoints.size()+"/"+count_all_points+" "+count+"/"+iEntities.size());
+			//System.out.println("Match bound:"+match_bound+" found:"+aJoinPoints.size()+"/"+count_all_points+" "+count+"/"+iEntities.size());
 		}
 		
 		return aJoinPoints;

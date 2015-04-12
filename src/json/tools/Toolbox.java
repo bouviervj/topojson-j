@@ -18,8 +18,13 @@ public class Toolbox {
 	
 	static {
 		
-		sProj = ProjectionFactory.getNamedPROJ4CoordinateSystem("nad83:2001");
+		sProj = ProjectionFactory.getNamedPROJ4CoordinateSystem("esri:102003");
 	
+	}
+	
+	// TODO change this as not thread safe
+	public static void setCoordinateSystem(String iCoordinate){
+		sProj = ProjectionFactory.getNamedPROJ4CoordinateSystem(iCoordinate);
 	}
 	
 	public static Point2D.Double convertLatLong(double X, double Y){
@@ -28,6 +33,8 @@ public class Toolbox {
 		Point2D.Double aDst = new Point2D.Double();
 		
 		sProj.inverseTransform(aSrc, aDst);
+		//aDst.x = aSrc.x;
+		//aDst.y = aSrc.y;
 		
 		return aDst;
 		

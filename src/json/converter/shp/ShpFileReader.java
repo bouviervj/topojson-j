@@ -7,7 +7,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
+import json.converter.csv.CSVReader;
+import json.converter.dbf.DBFExtractor;
+import json.converter.merger.Merger;
 import json.geojson.Feature;
 import json.geojson.FeatureCollection;
 import json.geojson.objects.Bounding;
@@ -31,7 +37,11 @@ public class ShpFileReader {
 	};
 
 	String _filename;
+	String _basename;
+	String _dbfname;
 	DataInputStream _stream;
+	String[][] _filter; // Use to filter features in a SHP file: list of  key regexp to match according to the DBF file
+	CSVReader _assoc_reader;
 
 	/*
 	int _shapeType;
@@ -40,29 +50,82 @@ public class ShpFileReader {
 	double _Ymin,_Ymax;
 	double _Zmin,_Zmax;
 	double _Mmin,_Mmax;
-	
+
 	TreeMap<Integer,Record> _shapes;
-	*/
+	 */
 	FeatureCollection _groupRecord;
-	
-	public ShpFileReader(String iFileName){
+
+	public ShpFileReader(String iFileName, String iCoordinateSystem){
 
 		_filename = iFileName;
-		//_shapes = new TreeMap<Integer,Record>();
 
+		Toolbox.setCoordinateSystem(iCoordinateSystem);
+		
+		readAssociation();
+		
 	}
-	
+
+	public ShpFileReader(String iFileName, String iCoordinateSystem, String[][] iFilter) {
+
+		_filename = iFileName;
+		_filter = iFilter;
+
+		Toolbox.setCoordinateSystem(iCoordinateSystem);
+		
+		readAssociation();
+		
+	}
+
 	String giveShapeName(int iShapeType){
 		return _typeNames[iShapeType];
 	}
 
+	public void readAssociation(){
+
+		_basename = _filename.replaceFirst("[.][^.]+$", "");
+
+		_dbfname = _basename + ".dbf";
+
+		System.out.println("Tries to find :"+_dbfname);
+		File aDBF = new File(_dbfname);
+		if (aDBF.exists()) { // We have a DBF file associated 
+
+			System.out.println("Associate DBF File:"+_dbfname);
+			DBFExtractor.extractDBFDataToCSV(_dbfname, _basename+".csv");
+
+			CSVReader aReader = new CSVReader(_basename+".csv");
+			aReader.read();
+
+			_assoc_reader = aReader;
+
+		}
+
+	}
+	
+	public void mergeWithAssociation(Merger iMerger){
+		
+		if (_assoc_reader!=null) {
+				iMerger.process(_assoc_reader);
+		}
+		
+	}	
+	
+	public void mergeWithAssociation(String iColumn1, CSVReader aReader, String iColumn2){
+		
+		if (_assoc_reader!=null) {
+		
+				_assoc_reader.merge(iColumn1, "%s", aReader, iColumn2, "%s");
+			
+		}
+		
+	}
 
 	public void readHeader(){
 
 		try {
 
 			_groupRecord = new FeatureCollection();
-			
+
 			int aFileCode = _stream.readInt();
 
 			System.out.println("File code :"+aFileCode);
@@ -86,38 +149,38 @@ public class ShpFileReader {
 			_groupRecord._shapeType = Toolbox.little2big(aIBuffer);
 			System.out.println("Shape Type : "+giveShapeName(_groupRecord._shapeType));
 
-			
+
 			_groupRecord._bnd = new Bounding(0,0,0,0);
 			byte[] aDBuffer = new byte[8];
 			// Bounding
 			// XMin
 			_stream.read(aDBuffer);
 			_groupRecord._bnd.minx = Toolbox.getDoubleFromByte(aDBuffer);
-			
+
 
 			// YMin
 			_stream.read(aDBuffer);
 			_groupRecord._bnd.miny = Toolbox.getDoubleFromByte(aDBuffer);
-			
+
 
 			Point2D.Double aRes = Toolbox.convertLatLong(_groupRecord._bnd.minx, _groupRecord._bnd.miny);
 			_groupRecord._bnd.minx = aRes.x;
 			_groupRecord._bnd.miny = aRes.y;
-			
+
 			// XMax
 			_stream.read(aDBuffer);
 			_groupRecord._bnd.maxx = Toolbox.getDoubleFromByte(aDBuffer);
-			
+
 
 			// YMax
 			_stream.read(aDBuffer);
 			_groupRecord._bnd.maxy = Toolbox.getDoubleFromByte(aDBuffer);
-			
+
 
 			aRes = Toolbox.convertLatLong(_groupRecord._bnd.maxx, _groupRecord._bnd.maxy);
 			_groupRecord._bnd.maxx = aRes.x;
 			_groupRecord._bnd.maxy = aRes.y;
-			
+
 			/*
 			double swap;
 			if (_groupRecord._bnd._Xmin>_groupRecord._bnd._Xmax) {
@@ -125,12 +188,12 @@ public class ShpFileReader {
 				_groupRecord._bnd._Xmin = _groupRecord._bnd._Xmax;
 				_groupRecord._bnd._Xmax = swap;
 			}*/
-			
+
 			System.out.println("xmin : "+_groupRecord._bnd.minx);
 			System.out.println("ymin : "+_groupRecord._bnd.miny);
 			System.out.println("xmax : "+_groupRecord._bnd.maxx);
 			System.out.println("ymax : "+_groupRecord._bnd.maxy);
-			
+
 			// ZMin
 			_stream.read(aDBuffer);
 			//_groupRecord._Zmin = Toolbox.getDoubleFromByte(aDBuffer);
@@ -151,18 +214,46 @@ public class ShpFileReader {
 			//_groupRecord._Mmax = Toolbox.getDoubleFromByte(aDBuffer);
 			//System.out.println("mmax : "+_groupRecord._Mmax);
 
-			// here reading records
-
-			while (_stream.available()!=0) {
-				readRecord();
-			}
-
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+	}
+
+	public void readRecords(){
+
+		// here reading records
+
+		try {
+			while (_stream.available()!=0) {
+				readRecord();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public boolean  applyFilter(int iRecordNumber, LinkedHashMap< String, String> iMap){
+
+		if (_filter!=null) {
+
+			for (String[] aFilter:_filter) {
+
+				String aData = iMap.get(aFilter[0]);
+				if (aData==null) return false;
+				if (!Pattern.matches(aFilter[1], aData)) {
+					return false;
+				}
+
+			}
+
+		}
+
+		return true;
 	}
 
 	public void readRecord(){
@@ -171,25 +262,58 @@ public class ShpFileReader {
 
 			// Here reading record header
 			int aRecordNumber = _stream.readInt();
-			//System.out.println("Record # : "+aRecordNumber);
-
-			int aRecordSize = _stream.readInt();
-			//System.out.println("Record Size : "+aRecordSize);
-
-			byte[] aIBuffer = new byte[4];
-			_stream.read(aIBuffer);
-			int aShapeType = Toolbox.little2big(aIBuffer);
-			//System.out.println("Record Shape Type : "+giveShapeName(aShapeType));
 			
-			Shape aReadShape = null;
-			switch (aShapeType) {
-				case 5 : { //Polygons
-					aReadShape = Polygon.readPolygon(_stream);
+			LinkedHashMap<String,String> prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null);
+			boolean filter = (prop!=null?applyFilter(aRecordNumber,prop):true);
+			
+			
+
+			int aRecordSize = _stream.readInt(); // a better implementation will skip those bytes if filter = false
+			
+			if (filter) {
+				
+				//System.out.println("Record# : "+aRecordNumber);
+				//System.out.println("Prop : "+prop);
+	
+				//System.out.println("Size # : "+aRecordSize);
+				//System.out.println("Pos 1: "+_stream.available());
+				int a1 = _stream.available();
+				
+				
+				byte[] aIBuffer = new byte[4];
+				_stream.read(aIBuffer);
+				int aShapeType = Toolbox.little2big(aIBuffer);
+				//System.out.println("Record Shape Type : "+giveShapeName(aShapeType));
+	
+				Shape aReadShape = null;
+				switch (aShapeType) {
+					case 5 : { //Polygons
+						aReadShape = Polygon.readPolygon(_stream);
+					}
 				}
+				//System.out.println("Pos 2: "+_stream.available());
+				//System.out.println("Readen: "+(a1-_stream.available()));
+				
+				
+				//System.out.println("Record # : "+aRecordNumber);
+				
+				Feature aFeature = new Feature(aRecordNumber, aReadShape);
+				
+				if (prop!=null) {
+					for (Entry<String,String> aEnt: prop.entrySet()) {
+						aFeature.addProperty(aEnt.getKey(), aEnt.getValue());
+					}
+				}
+				
+				_groupRecord._shapes.put(new Integer(aRecordNumber), aFeature);
+				
+			} else {
+				
+				_stream.skip(aRecordSize*2);
+				
 			}
-			
-			_groupRecord._shapes.put(new Integer(aRecordNumber), new Feature(aRecordNumber, aReadShape));
-			
+
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -197,25 +321,33 @@ public class ShpFileReader {
 
 	}
 
-	public void read() throws FileNotFoundException{
+	public void read() throws IOException{
 
 		try {
 
 			_stream = new DataInputStream(new FileInputStream(new File(_filename)));
 
+			//readAssociation(); readen in constructor to be able to merge data with association
+
 			readHeader();
 
+			readRecords();
+
+			_stream.close();
+
 		} catch (FileNotFoundException e) {
+			throw e;
+		} catch (IOException e) {
 			throw e;
 		}
 
 
 	}
-	
+
 	public String toJson(){
 		return _groupRecord.toJson();
 	}
-	
+
 	public FeatureCollection getGroupRecord(){
 		return _groupRecord;
 	}
