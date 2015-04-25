@@ -1,6 +1,7 @@
 package json.geojson;
 
 
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +9,8 @@ import java.util.Set;
 import json.geojson.objects.Bounding;
 import json.geojson.objects.Object;
 import json.geojson.objects.Shape;
+import json.graphic.BasicColorifier;
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.topojson.algorithm.ArcMap;
 import json.topojson.geom.sub.Entity;
@@ -33,6 +36,10 @@ public class Feature extends Shape {
 		_properties.put(iName, iData);
 	}
 
+	public java.lang.Object getProperty(String iName){
+		return _properties.get(iName);
+	}
+	
 	public String valid(String iData){
 		
 		
@@ -107,9 +114,9 @@ public class Feature extends Shape {
 	}
 
 	@Override
-	public void draw(Display iDisp) {
+	public void draw(Display iDisp, Color iColor) {
 		// TODO Auto-generated method stub
-		_shape.draw(iDisp);
+		_shape.draw(iDisp,iColor);
 	}
 
 	@Override
@@ -141,7 +148,11 @@ public class Feature extends Shape {
 	public void rebuildIndexes(ArcMap iMap) {
 		_shape.rebuildIndexes(iMap);
 	}
-	
-	
+
+	@Override
+	public void fill(Display iDisplay, Colorifier iColor) {
+		Color aColor = iColor.getColor(_properties);
+		_shape.fill(iDisplay, new BasicColorifier(aColor));
+	}
 	
 }

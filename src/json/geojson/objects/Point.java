@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.tools.Toolbox;
 
@@ -62,14 +63,19 @@ public class Point extends Object {
 	}
 
 	@Override
-	public void draw(Display iDisp) {
+	public void draw(Display iDisp, Color iColor) {
 		// TODO Auto-generated method stub
-		iDisp.drawPoint(x, y, 2, Color.RED);
+		iDisp.drawPoint(x, y, 2, iColor);
 	}
 
 	@Override
 	public Object clone() {
 		return new Point(x,y);
+	}
+	
+	@Override
+	public void fill(Display iDisplay, Colorifier iColor) {
+		// TODO
 	}
 	
 }

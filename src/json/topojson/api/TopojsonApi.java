@@ -13,7 +13,7 @@ import javax.xml.bind.DatatypeConverter;
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
 
-import json.converter.merger.Merger;
+import json.converter.csv.merger.Merger;
 import json.converter.shp.ShpFileReader;
 import json.geojson.FeatureCollection;
 import json.geojson.objects.Bounding;

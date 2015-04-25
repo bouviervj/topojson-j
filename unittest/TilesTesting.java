@@ -1,3 +1,5 @@
+
+
 import java.awt.Color;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -6,6 +8,7 @@ import json.converter.csv.CSVReader;
 import json.converter.shp.ShpFileReader;
 import json.geojson.FeatureCollection;
 import json.geojson.objects.Bounding;
+import json.graphic.BasicColorifier;
 import json.graphic.Display;
 import json.graphic.DisplayListener;
 import json.topojson.algorithm.ArcMap;
@@ -85,7 +88,7 @@ public class TilesTesting implements DisplayListener {
 		_display.setBound(_res[_C_N][_C_M]._bnd);
 		
 		//_res[_C_N][_C_M].simplify(10);
-		_res[_C_N][_C_M].fill(_display, Color.green);
+		_res[_C_N][_C_M].fill(_display, new  BasicColorifier(Color.green));
 		_res[_C_N][_C_M].draw(_display);
 		//_res[_C_N][_C_M]._bnd.draw(_display);
 		

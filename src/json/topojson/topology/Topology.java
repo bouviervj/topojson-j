@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import json.algorithm.DouglasPeucker;
 import json.geojson.objects.Bounding;
 import json.geojson.objects.Point;
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.topojson.algorithm.ArcMap;
 import json.topojson.geom.Object;
@@ -45,8 +46,8 @@ public class Topology {
 		draw(0,0, iDisplay);
 	}
 	
-	public void fill(Display iDisplay, Color iColor){
-		fill(0,0, iDisplay, iColor);
+	public void fill(Display iDisplay, Colorifier iColorifier){
+		fill(0,0, iDisplay, iColorifier);
 	}
 	
 	public void draw(double tx, double ty, Display iDisplay){
@@ -71,10 +72,10 @@ public class Topology {
 		return len;
 	}
 	
-	public void fill(double tx, double ty, Display iDisplay, Color iColor){
+	public void fill(double tx, double ty, Display iDisplay, Colorifier iColorifier){
 		
 		 for (Object aObj:objects.values()){
-			 aObj.fill(this, iDisplay, iColor);
+			 aObj.fill(this, iDisplay, iColorifier);
 		 }
 		
 	}

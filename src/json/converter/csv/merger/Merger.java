@@ -1,4 +1,4 @@
-package json.converter.merger;
+package json.converter.csv.merger;
 
 import java.util.Vector;
 

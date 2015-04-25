@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.List;
 import java.util.Set;
 
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.topojson.geom.sub.Entity;
 import json.topojson.topology.Topology;
@@ -49,7 +50,7 @@ public class Polygon extends Object {
 	}
 	
 	@Override
-	public void fill(Topology iTopo, Display iDisplay, Color iColor) {
+	public void fill(Topology iTopo, Display iDisplay, Colorifier iColorifier) {
 		// TODO Auto-generated method stub
 		
 		for (int[] arc:arcs){
@@ -86,7 +87,7 @@ public class Polygon extends Object {
 					
 			}
 			
-			iDisplay.fillPolygons(x, y, count, iColor);
+			iDisplay.fillPolygons(x, y, count, iColorifier.getColor(properties));
 		}
 		
 	}

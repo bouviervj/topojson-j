@@ -12,8 +12,8 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import json.converter.csv.CSVReader;
+import json.converter.csv.merger.Merger;
 import json.converter.dbf.DBFExtractor;
-import json.converter.merger.Merger;
 import json.geojson.Feature;
 import json.geojson.FeatureCollection;
 import json.geojson.objects.Bounding;
@@ -264,16 +264,14 @@ public class ShpFileReader {
 			int aRecordNumber = _stream.readInt();
 			
 			LinkedHashMap<String,String> prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null);
-			boolean filter = (prop!=null?applyFilter(aRecordNumber,prop):true);
+			boolean filter = (prop!=null?applyFilter(aRecordNumber,prop):false);
 			
-			
-
 			int aRecordSize = _stream.readInt(); // a better implementation will skip those bytes if filter = false
 			
 			if (filter) {
 				
-				//System.out.println("Record# : "+aRecordNumber);
-				//System.out.println("Prop : "+prop);
+				System.out.println("Record# : "+aRecordNumber);
+				System.out.println("Prop : "+prop);
 	
 				//System.out.println("Size # : "+aRecordSize);
 				//System.out.println("Pos 1: "+_stream.available());

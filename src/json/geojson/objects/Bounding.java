@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.nio.ByteBuffer;
 
+import json.graphic.Colorifier;
 import json.graphic.Display;
 
 public class Bounding extends Object  {
@@ -162,11 +163,16 @@ public class Bounding extends Object  {
 	 }
 
 	@Override
-	public void draw(Display iDisp) {
-		iDisp.drawLine(minx, miny, minx, maxy, Color.red);
-		iDisp.drawLine(maxx, miny, minx, maxy, Color.red);
-		iDisp.drawLine(maxx, maxy, minx, maxy, Color.red);
-		iDisp.drawLine(maxx, maxy, minx, miny, Color.red);
+	public void draw(Display iDisp, Color iColor) {
+		iDisp.drawLine(minx, miny, minx, maxy, iColor);
+		iDisp.drawLine(maxx, miny, minx, maxy, iColor);
+		iDisp.drawLine(maxx, maxy, minx, maxy, iColor);
+		iDisp.drawLine(maxx, maxy, minx, miny, iColor);
+	}
+	
+	@Override
+	public void fill(Display iDisplay, Colorifier iColor) {
+		// TODO
 	}
 
 

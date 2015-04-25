@@ -15,6 +15,7 @@ import java.util.Vector;
 import org.apache.commons.lang3.ArrayUtils;
 
 import json.algorithm.DouglasPeucker;
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.tools.Toolbox;
 import json.topojson.algorithm.ArcMap;
@@ -280,7 +281,7 @@ public class Polygon extends Shape {
 	}
 
 	@Override
-	public void draw(Display iDisp) {
+	public void draw(Display iDisp, Color iColor) {
 		
 		for (int i=0; i<_parts.length; i++) {
 			
@@ -294,6 +295,18 @@ public class Polygon extends Shape {
 			
 		}
 		
+	}
+	
+	@Override
+	public void fill(Display iDisplay, Colorifier iColor) {
+		
+		double[] x = new double[_points.length];
+		double[] y = new double[_points.length];
+		for (int i=0; i<_points.length;i++) {
+			x[i] = _points[i].x;
+			y[i] = _points[i].y;
+		}
+		iDisplay.fillPolygons(x, y, _points.length, iColor.getColor(null));
 	}
 
 	@Override
@@ -327,8 +340,6 @@ public class Polygon extends Shape {
 			aEnt.rebuildIndexes(iMap);
 		}
 	}
-	
 
-	
 	
 }

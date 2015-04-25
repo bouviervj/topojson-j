@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.LinkedList;
 import java.util.Vector;
 
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.topojson.topology.Topology;
 
@@ -47,9 +48,9 @@ public class GeometryCollection extends Object{
 	}
 
 	@Override
-	public void fill(Topology iTopo, Display iDisplay, Color iColor) {
+	public void fill(Topology iTopo, Display iDisplay, Colorifier iColorifier) {
 		for (Object aObject:geometries){
-			aObject.fill(iTopo, iDisplay, iColor);
+			aObject.fill(iTopo, iDisplay, iColorifier);
 		}
 	}
 	

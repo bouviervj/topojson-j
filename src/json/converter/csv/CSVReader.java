@@ -4,12 +4,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,8 +26,8 @@ import json.tools.EntryImp;
 public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,String>> {
 
 	//String _filename;
-	InputStream  _instream;
-	BufferedReader _reader;
+	protected InputStream  _instream;
+	protected BufferedReader _reader;
 	String[] _header = null;
 
 	public TreeMap<Integer, LinkedHashMap<String,String>> _data;
@@ -81,21 +83,21 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 					LinkedHashMap<String,String> aTupple = new LinkedHashMap<String,String>();
 
 					aTupple.put("rowid", String.format("%d", count) );
-					
+
 					if (_header==null) {
-						
+
 						for (int i=0; i<data.length;i++) {
-								aTupple.put("c"+i, data[i].trim());
+							aTupple.put("c"+i, data[i].trim());
 						}
-						
+
 					} else {
-					
+
 						for (int i=0; i<_header.length;i++) {
 							if (i<data.length) {
 								aTupple.put(_header[i].trim(), data[i].trim());
 							}
 						}
-					
+
 					}
 
 					_data.put(count,aTupple);
@@ -122,7 +124,7 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 	public void read(boolean readHeader){
 
 		try {
-			
+
 			_reader = new BufferedReader(new InputStreamReader(_instream));
 
 			if (readHeader) readHeader();
@@ -130,18 +132,18 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 			readData();
 
 			_reader.close();
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
-	
+
 	public void read(){
 		read(true);
 	}
-	
+
 	public void readWithoutHeader(){
 		read(false);
 	}
@@ -160,55 +162,66 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 
 		HashMap<String,Vector<EntryImp<String,Integer>>> aIndex2 = new HashMap<String,Vector<EntryImp<String,Integer>>>();
 		for (Entry<Integer,LinkedHashMap<String,String>> entrySet: iReader._data.entrySet()){
-			
+
 			String aValue  = entrySet.getValue().get(iCol2);
-			
+
 			if (aValue.length()>1) { // else empty row, will be eliminated
 				String aHashedValue = String.format(iFormat2,aValue);
-	
+
 				//System.out.println("Registering:"+ aHashedValue);
-				
+
 				if (!aIndex2.containsKey(aHashedValue)) {
 					aIndex2.put(aHashedValue, new Vector<EntryImp<String,Integer>>());
 				} 
 				aIndex2.get(aHashedValue).add(new EntryImp<String,Integer>(aHashedValue,entrySet.getKey()));
-	
+
 				if (aIndex2.get(aHashedValue).size()>1) {
 					System.err.println(aHashedValue+" ("+iCol2+") hash overlap:"+aIndex2.get(aHashedValue)+ " Value:"+ entrySet.getValue() );
 				}
 			}
-			
+
 		}
+		
+		//TreeMap<Integer, LinkedHashMap<String,String>> newData = new TreeMap<Integer, LinkedHashMap<String,String>>();
 
 		for (Entry<Integer,LinkedHashMap<String,String>> entrySet: _data.entrySet()){
 
 			String aValueToFind = String.format(iFormat1, entrySet.getValue().get(iCol1));
-			//System.out.print("tofd("+iCol1+"):"+aValueToFind);
+
 			Vector<EntryImp<String,Integer>> aIndex = aIndex2.get(aValueToFind);
 			if (aIndex!=null) {
 
-				//System.out.println(" associated");
-				
 				for (int i=0; i<aIndex.size(); i++){
 
 					if (aValueToFind.equals(aIndex.get(i).getKey())) {
 						LinkedHashMap<String,String> toMerge = iReader._data.get(aIndex.get(i).getValue());
-
+						
 						for (Entry<String,String> aTuple:toMerge.entrySet()) {
 
 							if (!aTuple.getKey().equals("rowid")) {
 								entrySet.getValue().put(aTuple.getKey(), aTuple.getValue());
 							}
+						
 						}
+						
 					}
 
+				} 
+
+			}  else { // If no match we complete the line anyway // TODO factorize algorithm
+				
+				LinkedHashMap<String,String> aToAdd = iReader._data.firstEntry().getValue();
+				for (String aKey:aToAdd.keySet()) {
+					if (!aKey.equals("rowid")) {
+						entrySet.getValue().put(aKey,"");
+					}
 				}
-
-			} /*else {
-				System.out.println(" not associated");
-			}*/
-
-		}	
+				
+			}
+			
+		}
+		
+		//_data = newData;
 
 	}
 
@@ -369,5 +382,57 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 		return _data.values();
 	}
 
-		
+	public String buildCSV(TreeMap<Integer, LinkedHashMap<String,String>> iData){
+
+		StringBuffer aBuffer = new StringBuffer();
+		// Builds the header
+		LinkedHashMap<String,String> aHeaderLine = iData.firstEntry().getValue();
+		for(Iterator<String> i = aHeaderLine.keySet().iterator(); i.hasNext(); ) {
+			aBuffer.append(i.next());
+			if (i.hasNext()) aBuffer.append(",");
+		}
+		aBuffer.append("\n");
+
+		for (LinkedHashMap<String,String> aLine:iData.values()){
+
+			for (Iterator<String> i = aLine.keySet().iterator(); i.hasNext(); ){
+				
+				String aValue = aLine.get(i.next());
+				if (aValue.contains(",")){
+					aBuffer.append("\"");
+					aBuffer.append(aValue);
+					aBuffer.append("\"");
+				} else {
+					aBuffer.append(aValue);
+				}
+				if (i.hasNext()) aBuffer.append(",");
+			}
+			aBuffer.append("\n");
+
+		}
+
+		return aBuffer.toString();
+	}
+
+	public void write(String iFileName){
+
+		String aCSVData = buildCSV(_data);
+
+		FileOutputStream out;
+		try {
+			out = new FileOutputStream(iFileName);
+			out.write(aCSVData.getBytes());
+			out.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+
 }
+

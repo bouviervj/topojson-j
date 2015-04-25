@@ -2,6 +2,7 @@ package json.topojson.geom;
 
 import java.awt.Color;
 
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.topojson.topology.Topology;
 
@@ -25,7 +26,7 @@ public abstract class Object {
 	
 	public abstract int findMaxArcIndex();
 	
-	public abstract void fill(Topology iTopo, Display iDisplay, Color iColor );
+	public abstract void fill(Topology iTopo, Display iDisplay, Colorifier iColorifier );
 	
 	
 	

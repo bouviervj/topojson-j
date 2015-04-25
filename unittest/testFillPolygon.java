@@ -3,8 +3,8 @@ import graphics.CensusColorifier;
 import java.awt.Color;
 import java.io.IOException;
 
-import json.converter.merger.Merger;
-import json.converter.merger.Merger.MergeStep;
+import json.converter.csv.merger.Merger;
+import json.converter.csv.merger.Merger.MergeStep;
 import json.geojson.FeatureCollection;
 import json.graphic.Display;
 import json.topojson.algorithm.ArcMap;
@@ -35,17 +35,17 @@ public class testFillPolygon {
 		
 		ArcMap aMap = TopojsonApi.joinCollection(aFeat);
 		
-		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  7	, "MA");
+		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  6, "MA");
 
 		int n = 0;
-		int m = 0;
+		int m = 1;
 		
 		aDisplay.setBound(aRes[n][m]._bnd);
 
-		CensusColorifier aColorifier = new CensusColorifier(aRes[n][m]);
+		CensusColorifier aColorifier = new CensusColorifier(aRes[n][m],"AV0AA125");
 		
-		aRes[n][m].fill(aDisplay,Color.green);
-		aRes[n][m].draw(aDisplay);
+		aRes[n][m].fill(aDisplay,aColorifier);
+		//aRes[n][m].draw(aDisplay);
 		aDisplay.render();
 
 		

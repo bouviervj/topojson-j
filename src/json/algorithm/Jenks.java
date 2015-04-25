@@ -4,6 +4,15 @@ public class Jenks {
 
 
 	public static double[] computeJenks(int iNClass,double[] iSerie){
+		
+		if (iNClass>iSerie.length) {
+			double[] kclass = new double[iNClass+1];
+			for (int i=0; i<iSerie.length-1; i++){
+				kclass[i*2]=iSerie[i];
+				kclass[i*2+1]=iSerie[i+1];
+			}
+			return kclass;
+		}
 
 		double[][] mat1 = new double[iSerie.length+1][];
 		for (int x = 0, xl = iSerie.length + 1; x < xl; x++) {

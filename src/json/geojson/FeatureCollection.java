@@ -1,6 +1,7 @@
 package json.geojson;
 
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import json.converter.csv.CSVReader;
 import json.geojson.objects.Bounding;
 import json.geojson.objects.Bounding.Tile;
 import json.geojson.objects.Shape;
+import json.graphic.Colorifier;
 import json.graphic.Display;
 import json.tools.EntryImp;
 import json.topojson.algorithm.ArcMap;
@@ -365,14 +367,6 @@ public class FeatureCollection extends Shape {
 		return null;
 	}
 
-
-	@Override
-	public void draw(Display iDisp) {
-		for (Shape aShape:_shapes.values()) {
-			aShape.draw(iDisp);
-		}
-	}
-
 	@Override
 	public int[] arcs() {
 		int[] aAll= {};
@@ -416,6 +410,20 @@ public class FeatureCollection extends Shape {
 	public void rebuildIndexes(ArcMap iMap) {
 		for (Feature aEnt:_shapes.values()) {
 			aEnt.rebuildIndexes(iMap);
+		}
+	}
+
+	@Override
+	public void draw(Display iDisplay, Color iColor) {
+		for (Feature aEnt:_shapes.values()) {
+			aEnt.draw(iDisplay, iColor);
+		}
+	}
+
+	@Override
+	public void fill(Display iDisplay, Colorifier iColor) {
+		for (Feature aEnt:_shapes.values()) {
+			aEnt.fill(iDisplay, iColor);
 		}
 	}
 
