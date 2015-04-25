@@ -159,6 +159,10 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 	}
 
 	public void merge(String iCol1, String iFormat1, CSVReader iReader, String iCol2, String iFormat2) {
+		merge(iCol1, iFormat1, iReader, iCol2, iFormat2, false);
+	}
+	
+	public void merge(String iCol1, String iFormat1, CSVReader iReader, String iCol2, String iFormat2, boolean iJoin) {
 
 		HashMap<String,Vector<EntryImp<String,Integer>>> aIndex2 = new HashMap<String,Vector<EntryImp<String,Integer>>>();
 		for (Entry<Integer,LinkedHashMap<String,String>> entrySet: iReader._data.entrySet()){
@@ -182,7 +186,7 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 
 		}
 		
-		//TreeMap<Integer, LinkedHashMap<String,String>> newData = new TreeMap<Integer, LinkedHashMap<String,String>>();
+		TreeMap<Integer, LinkedHashMap<String,String>> newData = new TreeMap<Integer, LinkedHashMap<String,String>>();
 
 		for (Entry<Integer,LinkedHashMap<String,String>> entrySet: _data.entrySet()){
 
@@ -205,23 +209,27 @@ public class CSVReader  implements SortedMap<Integer, LinkedHashMap<String,Strin
 						}
 						
 					}
-
+					
+					newData.put(entrySet.getKey(), entrySet.getValue());
 				} 
 
 			}  else { // If no match we complete the line anyway // TODO factorize algorithm
 				
-				LinkedHashMap<String,String> aToAdd = iReader._data.firstEntry().getValue();
-				for (String aKey:aToAdd.keySet()) {
-					if (!aKey.equals("rowid")) {
-						entrySet.getValue().put(aKey,"");
+				if (!iJoin) {
+					LinkedHashMap<String,String> aToAdd = iReader._data.firstEntry().getValue();
+					for (String aKey:aToAdd.keySet()) {
+						if (!aKey.equals("rowid")) {
+							entrySet.getValue().put(aKey,"");
+						}
 					}
+					newData.put(entrySet.getKey(), entrySet.getValue());
 				}
 				
 			}
 			
 		}
 		
-		//_data = newData;
+		_data = newData;
 
 	}
 

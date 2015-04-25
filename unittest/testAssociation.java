@@ -24,7 +24,7 @@ public class testAssociation {
 
 		String aYear = "2010";
 		
-		String[][] aFilter = {{"STATEA", "500" }, {"GJOIN"+aYear, ".+"}};
+		String[][] aFilter = {{"STATEA", "530" }, {"GJOIN"+aYear, ".+"}};
 
 		try {
 
@@ -49,7 +49,7 @@ public class testAssociation {
 			_display.setBound(aBound);
 			
 			aFeat.fill(_display, new JenksColorifierGeojson(aFeat,"AV0AA125"));
-			aFeat.draw(_display, Color.white);
+			//aFeat.draw(_display, Color.white);
 			
 			_display.saveImage("./data/STATE_"+aFilter[0][1]+"_"+aYear+"_high.png");
 			

@@ -300,13 +300,25 @@ public class Polygon extends Shape {
 	@Override
 	public void fill(Display iDisplay, Colorifier iColor) {
 		
-		double[] x = new double[_points.length];
-		double[] y = new double[_points.length];
-		for (int i=0; i<_points.length;i++) {
-			x[i] = _points[i].x;
-			y[i] = _points[i].y;
+		for (int i=0; i<_parts.length; i++) {
+			
+			int min = _parts[i];
+			int max = (i==_parts.length-1?_points.length:_parts[i+1]);
+			
+			double[] x = new double[max-min+1];
+			double[] y = new double[max-min+1];
+			
+			int count = 0;
+			for (int j=min; j<max; j++) {
+				x[count] = _points[j].x;
+				y[count] = _points[j].y;
+				count++;
+			}
+			
+			iDisplay.fillPolygons(x, y, max-min+1, iColor.getColor(null));
+			
 		}
-		iDisplay.fillPolygons(x, y, _points.length, iColor.getColor(null));
+		
 	}
 
 	@Override
