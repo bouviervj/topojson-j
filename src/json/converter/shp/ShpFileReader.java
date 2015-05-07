@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -112,8 +113,9 @@ public class ShpFileReader {
 	
 	public void mergeWithAssociation(String iColumn1, CSVReader aReader, String iColumn2){
 		
+		System.out.println("Trying to merge association ...");
 		if (_assoc_reader!=null) {
-		
+				System.out.println("Assoc reader present ...");
 				_assoc_reader.merge(iColumn1, "%s", aReader, iColumn2, "%s");
 			
 		}
@@ -237,13 +239,14 @@ public class ShpFileReader {
 
 	}
 
-	public boolean  applyFilter(int iRecordNumber, LinkedHashMap< String, String> iMap){
+	public boolean  applyFilter(int iRecordNumber, CSVReader iReader, int iRow){
 
 		if (_filter!=null) {
-
+			
 			for (String[] aFilter:_filter) {
-
-				String aData = iMap.get(aFilter[0]);
+				
+				int aIndex= iReader._header.indexOf(aFilter[0]);
+				String aData = iReader._data.get(iRow)[aIndex];
 				if (aData==null) return false;
 				if (!Pattern.matches(aFilter[1], aData)) {
 					return false;
@@ -263,18 +266,16 @@ public class ShpFileReader {
 			// Here reading record header
 			int aRecordNumber = _stream.readInt();
 			
-			LinkedHashMap<String,String> prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null);
-			boolean filter = (prop!=null?applyFilter(aRecordNumber,prop):false);
+			String[] prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null);
+			boolean filter = (prop!=null?applyFilter(aRecordNumber,_assoc_reader, aRecordNumber):false);
 			
 			int aRecordSize = _stream.readInt(); // a better implementation will skip those bytes if filter = false
 			
 			if (filter) {
 				
-				System.out.println("Record# : "+aRecordNumber);
-				System.out.println("Prop : "+prop);
-	
-				//System.out.println("Size # : "+aRecordSize);
-				//System.out.println("Pos 1: "+_stream.available());
+				//System.out.println("Record# : "+aRecordNumber);
+				//System.out.println("Prop : "+prop);
+
 				int a1 = _stream.available();
 				
 				
@@ -298,8 +299,8 @@ public class ShpFileReader {
 				Feature aFeature = new Feature(aRecordNumber, aReadShape);
 				
 				if (prop!=null) {
-					for (Entry<String,String> aEnt: prop.entrySet()) {
-						aFeature.addProperty(aEnt.getKey(), aEnt.getValue());
+					for (int i=0; i<prop.length; i++) {
+						aFeature.addProperty(_assoc_reader._header.get(i), prop[i]);
 					}
 				}
 				

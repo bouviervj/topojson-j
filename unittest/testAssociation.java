@@ -24,7 +24,7 @@ public class testAssociation {
 
 		String aYear = "2010";
 		
-		String[][] aFilter = {{"STATEA", "530" }, {"GJOIN"+aYear, ".+"}};
+		String[][] aFilter = {{"STATEA", "080" }, {"GJOIN"+aYear, ".+"}};
 
 		try {
 

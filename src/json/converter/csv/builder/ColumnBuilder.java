@@ -1,7 +1,11 @@
 package json.converter.csv.builder;
 
 import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.Vector;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import json.converter.csv.CSVReader;
 
@@ -19,17 +23,17 @@ public class ColumnBuilder {
 			
 			String _format;
 			TYPE _type;
-			String _key;
+			int _key;
 			
-			public Token(String iFormat, TYPE iType, String iKey ){
+			public Token(String iFormat, TYPE iType, int iIndexKey ){
 				_format = iFormat;
 				_type = iType;
-				_key = iKey;
+				_key = iIndexKey;
 			}
 			
-			public String format(LinkedHashMap<String,String> iRow){
+			public String format(String[] iRow){
 				
-				String aVal =  iRow.get(_key);
+				String aVal =  iRow[_key];
 				switch (_type) {
 					case INTEGER: return String.format(_format,new Integer(aVal.equals("")?"0":aVal)); 
 					case STRING: return String.format(_format,aVal); 
@@ -49,7 +53,7 @@ public class ColumnBuilder {
 			_tokens.add(iToken);
 		}
 		
-		public String format(LinkedHashMap<String,String> iRow){
+		public String format(String[] iRow){
 			StringBuffer aBuffer = new StringBuffer();
 			for (Token tok:_tokens){
 				aBuffer.append(tok.format(iRow));
@@ -58,9 +62,13 @@ public class ColumnBuilder {
 		}
 		
 		public void build(CSVReader iReader){
-			for (LinkedHashMap<String, String> aRow:iReader._data.values()){
-				aRow.put(_name, format(aRow));
+			iReader._header.add(_name);
+			TreeMap<Integer,String[]> aNew = new TreeMap<Integer,String[]>();
+			for (Entry<Integer,String[]> aRowEnt:iReader._data.entrySet()){
+				String[] newLine = ArrayUtils.add(aRowEnt.getValue(), format(aRowEnt.getValue()));
+				aNew.put(aRowEnt.getKey(),newLine);
 			}
+			iReader._data = aNew;
 		}
 		
 

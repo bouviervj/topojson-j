@@ -37,8 +37,8 @@ public class testFillPolygon {
 		
 		Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  6, "MA");
 
-		int n = 0;
-		int m = 1;
+		int n = 1;
+		int m = 0;
 		
 		aDisplay.setBound(aRes[n][m]._bnd);
 

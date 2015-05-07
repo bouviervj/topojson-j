@@ -16,6 +16,8 @@ public class Merger {
 		    String _format2;
 		    
 		    CSVReader _reader;
+		    
+		    boolean _join;
 		
 			public MergeStep(String iCol1, String iFormat1, String iFileName, String iCol2, String iFormat2){
 					_col1 = iCol1;
@@ -24,10 +26,21 @@ public class Merger {
 					_reader.read();
 					_col2 = iCol2;
 					_format2 = iFormat2;
+					_join = false;
+			}
+			
+			public MergeStep(String iCol1, String iFormat1, String iFileName, String iCol2, String iFormat2, boolean iJoin){
+					_col1 = iCol1;
+					_format1 = iFormat1;
+					_reader = new CSVReader(iFileName);
+					_reader.read();
+					_col2 = iCol2;
+					_format2 = iFormat2;
+					_join = iJoin;
 			}
 			
 			public void process(CSVReader iReader){
-					iReader.merge(_col1, _format1, _reader, _col2, _format2);
+					iReader.merge(_col1, _format1, _reader, _col2, _format2, _join);
 			}
 		
 	}

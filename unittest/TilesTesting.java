@@ -129,7 +129,7 @@ public class TilesTesting implements DisplayListener {
 	 */
 	public static void main(String[] args) {
 
-		new TilesTesting("", 6);
+		new TilesTesting("", 7);
 
 	}
 

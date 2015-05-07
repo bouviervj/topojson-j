@@ -261,7 +261,8 @@ public class FeatureCollection extends Shape {
 		// TODO Auto-generated method stub
 		return _bnd;
 	}
-
+	
+/*
 	public void merge(CSVReader aReader, String iCol, String[] iAccepted, String[] iUnits, String[] iTitles){
 
 		_minmax_properties = new HashMap<String, EntryImp<Double,Double>>();
@@ -278,9 +279,10 @@ public class FeatureCollection extends Shape {
 			_meta_properties.put(iAccepted[i], aMap);
 		}
 
-		for (Entry<Integer,LinkedHashMap<String,String>> aEntry : aReader._data.entrySet()){
+		int aIndex =  aReader._header.indexOf(iCol);
+		for (Entry<Integer,String[]> aEntry : aReader._data.entrySet()){
 
-			String aValue = aEntry.getValue().get(iCol);
+			String aValue = aEntry.getValue()[aIndex];
 			Integer aIntValue = new Integer(aValue);
 
 			Feature aRecord = _shapes.get(aIntValue);
@@ -344,6 +346,8 @@ public class FeatureCollection extends Shape {
 		}
 
 	}
+
+*/
 
 	@Override
 	public List<Entity> extract() {
