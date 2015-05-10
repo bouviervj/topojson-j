@@ -40,8 +40,7 @@ public class JenksColorifierGeojson extends  Colorifier {
 			if (aProp instanceof String ) {
 
 				java.lang.Object toconvert =aProp;
-				System.out.println("Param:"+_param+" value:"+aProp);
-
+				
 				if (toconvert!=null) {
 					try {
 						aArrayProp.add(new Double((String) toconvert));
@@ -83,7 +82,12 @@ public class JenksColorifierGeojson extends  Colorifier {
 
 				for (int i=0;i<Colors.length; i++) {
 					if ((_ranges[i]<=value) && (_ranges[i+1]>value)){
-						return new Color(Colors[i]);
+						
+						float R = (Colors[i]>>16 & 0xFF)/256.0f;
+						float G = (Colors[i]>>8 & 0xFF)/256.0f;
+						float B = (Colors[i] & 0xFF)/256.0f;
+						
+						return new Color( R , G, B, 0.5f );
 					}
 				}
 

@@ -36,6 +36,10 @@ public class Feature extends Shape {
 		_properties.put(iName, iData);
 	}
 
+	public HashMap<String,java.lang.Object>  getProperties(){
+		return _properties;
+	}
+	
 	public java.lang.Object getProperty(String iName){
 		return _properties.get(iName);
 	}

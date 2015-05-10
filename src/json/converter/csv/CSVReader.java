@@ -81,7 +81,7 @@ public class CSVReader  implements SortedMap<Integer, String[] > {
 	public void readData(){
 
 		try {
-			int count = 1;
+			int count = 0;
 			String line;
 			while ((line = _reader.readLine()) != null) {
 
@@ -90,7 +90,7 @@ public class CSVReader  implements SortedMap<Integer, String[] > {
 					
 					data = CSVReader.readCSVLine(line);
 
-					if (count==1 && _header.size()==0) {
+					if (count==0 && _header.size()==0) {
 						for (int i=0; i<data.length;i++) {
 							_header.add("c"+i);
 						}
@@ -170,6 +170,20 @@ public class CSVReader  implements SortedMap<Integer, String[] > {
 		merge(iCol1, iFormat1, iReader, iCol2, iFormat2, false);
 	}
 	
+	public void filter(String iColumn, String iValue){
+		
+		TreeMap<Integer, String[]> newData = new TreeMap<Integer, String[]>();
+
+		int aCol1Index = _header.indexOf(iColumn);
+		
+		for (Entry<Integer,String[]> entrySet: _data.entrySet()){
+			if (iValue.equals(entrySet.getValue()[aCol1Index])) newData.put(entrySet.getKey(), entrySet.getValue());
+		}
+		
+		_data = newData;
+		
+	}
+	
 	public void merge(String iCol1, String iFormat1, CSVReader iReader, String iCol2, String iFormat2, boolean iJoin) {
 
 		System.out.println("Merging between "+iCol1+ " & "+iCol2);
@@ -190,9 +204,11 @@ public class CSVReader  implements SortedMap<Integer, String[] > {
 				} 
 				aIndex2.get(aHashedValue).add(new EntryImp<String,Integer>(aHashedValue,entrySet.getKey()));
 
+				/*
 				if (aIndex2.get(aHashedValue).size()>1) {
 					System.err.println(aHashedValue+" ("+iCol2+") hash overlap:"+aIndex2.get(aHashedValue)+ " Value:"+ entrySet.getValue() );
 				}
+				*/
 			}
 
 		}
@@ -398,7 +414,7 @@ public class CSVReader  implements SortedMap<Integer, String[] > {
 
 		StringBuffer aBuffer = new StringBuffer();
 		// Builds the header
-		String[] aHeaderLine = iData.firstEntry().getValue();
+		String[] aHeaderLine = _header.toArray(new String[_header.size()]);
 		
 		aBuffer.append(StringUtils.join(aHeaderLine,","));
 		aBuffer.append("\n");

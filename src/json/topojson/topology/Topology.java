@@ -22,6 +22,7 @@ public class Topology {
 	
 	transient boolean _notsaved;
 	transient java.lang.Object[][][] _saved_arcs;
+	transient public HashMap<String, java.lang.Object> _meta_properties;
 	
 	public transient Bounding _bnd;
 	

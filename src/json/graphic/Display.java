@@ -1,6 +1,7 @@
 package json.graphic;
 
 
+import java.awt.AlphaComposite;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -21,7 +22,7 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	int _width;
 	int _height;
 	BufferedImage offscreen; 
-	Graphics bufferGraphics;
+	Graphics2D bufferGraphics;
 	Bounding _bound;
 	double sx,sy;
 	
@@ -34,7 +35,7 @@ public class Display extends Canvas implements Runnable, KeyListener {
 		_height = iHeight;
 		
 		offscreen = new BufferedImage(_width,_height, BufferedImage.TYPE_4BYTE_ABGR);
-		bufferGraphics = offscreen.getGraphics();
+		bufferGraphics = (Graphics2D) offscreen.getGraphics();
 		
 		Graphics2D g2 = (Graphics2D) bufferGraphics;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -56,7 +57,10 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	}
 	
 	public void clear(){
-		bufferGraphics.clearRect(0, 0, _width, _height);
+		bufferGraphics.setComposite(AlphaComposite.Clear);
+		bufferGraphics.setColor(new Color(0f, 0f, 0f, 0.0f ));
+		bufferGraphics.fillRect(0, 0, _width, _height);
+		bufferGraphics.setComposite(AlphaComposite.Src);
 	}
 	
 	public void drawLine(double x1, double y1, double x2, double y2, Color iCol) {
@@ -80,7 +84,7 @@ public class Display extends Canvas implements Runnable, KeyListener {
 		JFrame frame = new JFrame();
 		//frame.setUndecorated(true);
 		frame.setSize(_width, _height);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.getContentPane().add(this);                    
 		frame.setVisible(true);
 		

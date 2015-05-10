@@ -36,7 +36,7 @@ public class TilesExplosion {
 			ArcMap aMap = TopojsonApi.joinCollection(aFeat);
 			
 			_res = TopojsonApi.tileFeatureCollectionToTopojson(aFeat, aMap,
-					14,
+					10,
 					"MA"
 					);
 			

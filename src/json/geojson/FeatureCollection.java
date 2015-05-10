@@ -37,66 +37,15 @@ public class FeatureCollection extends Shape {
 
 	public Bounding _bnd;
 
-	/*
-	public double _Xmin,_Xmax;
-	public double _Ymin,_Ymax;
-	 */
-	/*
-	public double _Zmin,_Zmax;
-	public double _Mmin,_Mmax;
-	 */
-
 	public TreeMap<Integer,Feature> _shapes;
 
-	HashMap<String, EntryImp<Double,Double>> _minmax_properties;
-	HashMap<String, List<Double>> _minmax_properties_series;
-	HashMap<String, HashMap<String,String>> _meta_properties;
+   public transient HashMap<String, java.lang.Object> _meta_properties;
 
 	public FeatureCollection(){
 		_shapes = new TreeMap<Integer,Feature>();
-		_meta_properties = new HashMap<String, HashMap<String,String>>();
+		_meta_properties = new HashMap<String, java.lang.Object>();
 	}
 
-	public void mergeMinMaxProperties(String[] iProperties){
-
-		if (iProperties.length>0){
-			EntryImp<Double,Double> aEntry = _minmax_properties.get(iProperties[0]);
-
-			if (aEntry!=null) {
-
-				for (int i=1; i<iProperties.length; i++) {
-
-					EntryImp<Double,Double> aEntC = _minmax_properties.get(iProperties[i]);
-					if (aEntC.getKey()<aEntry.getKey()) aEntry.setKey(aEntC.getKey());
-					if (aEntC.getValue()>aEntry.getValue()) aEntry.setValue(aEntC.getValue());
-
-				}
-
-				for (int i=0; i<iProperties.length; i++) {
-					_minmax_properties.put(iProperties[i], aEntry);
-				}
-
-			} else {
-
-				System.err.println("Unable to find property:"+iProperties[0]);
-
-			}
-
-			List<Double> aSerie = _minmax_properties_series.get(iProperties[0]);
-			for (int i=1; i<iProperties.length; i++) {
-
-				List<Double> aList = _minmax_properties_series.get(iProperties[i]);
-				aSerie.addAll(aList);
-
-			}
-			Collections.sort(aSerie);
-			for (int i=0; i<iProperties.length; i++) {
-				_minmax_properties_series.put(iProperties[i], aSerie);
-			}
-
-		}		
-
-	}
 
 	public String toJson(){
 
@@ -118,86 +67,85 @@ public class FeatureCollection extends Shape {
 
 	}
 
-	public String toJsonMinMaxProperties(String[] aDrop){
-
-		StringBuffer aBuf = new StringBuffer();
-
-		HashSet<String> aToRemove = new HashSet<String>();
-		for (String aD:aDrop){
-			aToRemove.add(aD);
-		}
-
-		aBuf.append("{");
-
-		String[] aKeys = new String[_minmax_properties.size()];
-		aKeys = _minmax_properties.keySet().toArray(aKeys);
-
-		boolean first = true;
-		for (int i=0; i<aKeys.length; i++) {
-
-			String aKey = aKeys[i].replace("\"", "");
-			
-			if (!aToRemove.contains(aKey)) {
-
-				if (!first) {
-					aBuf.append(",");
-				}
-
-				aBuf.append("\"");
-				aBuf.append(aKey);
-				aBuf.append("\" : {");
-
-				aBuf.append("\"min\" : ");
-				aBuf.append(_minmax_properties.get(aKeys[i]).getKey());
-				aBuf.append(" , \"max\" : ");
-				aBuf.append(_minmax_properties.get(aKeys[i]).getValue());
-
-				HashMap<String,String> aMap = _meta_properties.get(aKeys[i]);
-				if (aMap.size()>0) {
-
-					for (Entry<String,String> aEnt:aMap.entrySet()) {
-						aBuf.append(",");
-						aBuf.append("\""+aEnt.getKey()+"\" : \"");
-						aBuf.append(aEnt.getValue());
-						aBuf.append("\"");
-					}
-
-				}
-				aBuf.append(", \"serie\" : [ ");
-				
-				// comput Jenks
-				
-				List<Double> aList = _minmax_properties_series.get(aKeys[i]);
-				double[] aSerie = new double[aList.size()];
-				for (int j=0; j<aList.size(); j++) {
-					aSerie[j] = aList.get(j);
-					//aBuf.append(String.format("%.2f", aList.get(j)));
-					//if (j!=aList.size()-1) aBuf.append(",");
-				}
-				
-				double[] aResult = Jenks.computeJenks(5, aSerie);
-				
-				//List<Double> aList = _minmax_properties_series.get(aKeys[i]);
-				for (int j=0; j<aResult.length; j++) {
-					aBuf.append(String.format("%.2f", aResult[j]));
-					if (j!=aResult.length-1) aBuf.append(",");
-				}
-				aBuf.append("] ");
-				aBuf.append("}");
-
-				first = false;
-			}
-
-		}
-
-		aBuf.append("}");
-
-		return aBuf.toString();
-
-	}
-
 	
 	// Divide a feature collection in standard tiles based onn openstreetmap definition
+	
+	public static class TileElement {
+		
+			public int x;
+			public int y;
+			public int zoom;
+			
+			TileElement(int x, int y, int zoom){
+				this.x = x;
+				this.y = y;
+				this.zoom = zoom;
+			}
+		
+	}
+	
+	public Vector<TileElement>  dimTiles(int iZoom){
+		
+		Vector<TileElement> aResult  = new Vector<TileElement>();
+		
+		Tile aMinTile = Bounding.getTileNumber(_bnd.miny, /* lon*/_bnd.minx,  iZoom);
+		Tile aMaxTile = Bounding.getTileNumber( _bnd.maxy, /*lon*/_bnd.maxx, iZoom);
+		
+		System.out.println("Max:"+_bnd.maxx+","+_bnd.maxy);
+		System.out.println("Min:"+_bnd.minx+","+_bnd.miny);
+		
+		int aN = aMaxTile.x-aMinTile.x;
+		int aM = aMaxTile.y-aMinTile.y;
+		
+		System.out.println("N:"+aN);
+		System.out.println("M:"+aM);
+		
+		int aSN = aN<0?-1:+1;
+		int aSM = aM<0?-1:+1;
+		
+		aN = Math.abs(aN)+1;
+		aM = Math.abs(aM)+1;
+		
+		FeatureCollection[][] aDividedResult = new FeatureCollection[aN][aM];
+
+		for (int i=0; i<aN; i++) {
+
+			for (int j=0; j<aM; j++) {
+
+				int x = aMinTile.x+aSN*i;
+				int y = aMinTile.y+aSM*j;
+				
+				aResult.add(new TileElement(x,y,iZoom));
+				
+			}	
+		
+		}	
+			
+		return aResult;
+		
+	}
+	
+	public FeatureCollection processTileElement(TileElement iTileE){
+	
+		FeatureCollection aGroupRecord = new FeatureCollection();
+
+		Bounding aBnd = Bounding.tile2boundingBox(iTileE.x , iTileE.y , iTileE.zoom);
+		aGroupRecord._bnd = aBnd;
+		
+		//System.out.println(aBnd.toJson());
+
+		for (Entry<Integer,Feature> aERec:_shapes.entrySet()) {
+			if (aERec.getValue().partlyIn(aBnd) /*&& (!aAlreadySelected.contains(aERec.getKey()))*/) {
+				aGroupRecord._shapes.put(aERec.getKey(), (Feature) aERec.getValue());
+			}
+		}
+
+		aGroupRecord._meta_properties.put("x", new Integer(iTileE.x));
+		aGroupRecord._meta_properties.put("y", new Integer(iTileE.y));	
+	
+		return aGroupRecord;
+		
+	}
 	
 	public FeatureCollection[][] groupGridDivide(int iZoom/*int iN, int iM*/){
 
@@ -225,9 +173,12 @@ public class FeatureCollection extends Shape {
 
 			for (int j=0; j<aM; j++) {
 
+				int x = aMinTile.x+aSN*i;
+				int y = aMinTile.y+aSM*j;
+				
 				FeatureCollection aGroupRecord = new FeatureCollection();
 
-				Bounding aBnd = Bounding.tile2boundingBox(aMinTile.x+aSN*i ,aMinTile.y+aSM*j , iZoom);
+				Bounding aBnd = Bounding.tile2boundingBox(x , y , iZoom);
 				aGroupRecord._bnd = aBnd;
 				
 				//System.out.println(aBnd.toJson());
@@ -239,6 +190,8 @@ public class FeatureCollection extends Shape {
 				}
 
 				aDividedResult[i][j] = aGroupRecord;
+				aGroupRecord._meta_properties.put("x", new Integer(x));
+				aGroupRecord._meta_properties.put("y", new Integer(y));
 
 			}
 
@@ -262,93 +215,6 @@ public class FeatureCollection extends Shape {
 		return _bnd;
 	}
 	
-/*
-	public void merge(CSVReader aReader, String iCol, String[] iAccepted, String[] iUnits, String[] iTitles){
-
-		_minmax_properties = new HashMap<String, EntryImp<Double,Double>>();
-		_minmax_properties_series = new HashMap<String, List<Double>>();
-
-		HashSet<String> aSet = new HashSet<String>();
-		for (int i=0; i<iAccepted.length; i++){
-			aSet.add(iAccepted[i]);
-
-			HashMap<String, String > aMap = new HashMap<String,String>();
-			aMap.put("unit", iUnits[i]);
-			aMap.put("title", iTitles[i]);
-
-			_meta_properties.put(iAccepted[i], aMap);
-		}
-
-		int aIndex =  aReader._header.indexOf(iCol);
-		for (Entry<Integer,String[]> aEntry : aReader._data.entrySet()){
-
-			String aValue = aEntry.getValue()[aIndex];
-			Integer aIntValue = new Integer(aValue);
-
-			Feature aRecord = _shapes.get(aIntValue);
-			if (aRecord!=null) {
-
-
-				for (Entry<String,String> aKV : aEntry.getValue().entrySet()){
-
-
-					if ((!aKV.getKey().equals(iCol)) && (aSet.contains(aKV.getKey()))
-							&& ( !aKV.getValue().equals(""))) {
-
-						// Here we have selected values
-						// We want to build max min values for these properties
-						try {
-							double aDValue = Double.valueOf(aKV.getValue());
-							EntryImp<Double,Double> aMM = _minmax_properties.get(aKV.getKey());
-							if (aMM!=null) {
-
-								if (aMM.getKey()>aDValue) {
-									aMM.setKey(aDValue);
-								}
-
-								if (aMM.getValue()<aDValue) {
-									aMM.setValue(aDValue);
-								}
-
-							} else {
-
-								_minmax_properties.put(aKV.getKey(), new EntryImp<Double,Double>(aDValue,aDValue));
-
-							}
-
-							List<Double> aList = _minmax_properties_series.get(aKV.getKey());
-							if (aList==null) {
-								aList = new ArrayList<Double>();
-								_minmax_properties_series.put(aKV.getKey(), aList);
-							}
-							aList.add(aDValue);
-
-						} catch (java.lang.NumberFormatException e){
-							// unable to convert this data
-						}
-
-						String iKey = aKV.getKey().replace("\"", ""); // prevent inserting " in keys
-						aRecord.addProperty(iKey, aKV.getValue());
-
-					}
-
-				}
-
-			}
-
-		}
-
-		for (String aKey:_minmax_properties_series.keySet()) {
-
-			List<Double> aList = _minmax_properties_series.get(aKey);
-			Collections.sort(aList); // sort all lists
-
-		}
-
-	}
-
-*/
-
 	@Override
 	public List<Entity> extract() {
 		Vector<Entity> aEntities = new Vector<Entity>();
@@ -396,11 +262,8 @@ public class FeatureCollection extends Shape {
 		FeatureCollection aCollection = new FeatureCollection();
 		aCollection._shapeType = _shapeType;
 		aCollection._bnd = _bnd.clone();
-		aCollection._meta_properties = new HashMap<String,HashMap<String,String>>(aCollection._meta_properties);
-
-		if (_minmax_properties!=null) {
-			aCollection._minmax_properties = new HashMap<String, EntryImp<Double,Double>>(_minmax_properties);
-		}
+		
+		aCollection._meta_properties = _meta_properties;
 
 		for (Entry<Integer,Feature> aEnt:_shapes.entrySet()) {
 

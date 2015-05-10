@@ -50,7 +50,7 @@ public class testTopojson {
 			CSVReader aExtReader = new CSVReader("./data/US_NHGIS_2000.csv");
 			aExtReader.read();
 			ShpFileReader aReader = new ShpFileReader("./data/US.shp", "esri:102003", aFilter);
-			aReader.mergeWithAssociation("GISJOIN",aExtReader, "GISJOIN");
+			//aReader.mergeWithAssociation("GISJOIN",aExtReader, "GISJOIN");
 			aReader.read();
 			
 			Display aDisplay = new Display(1024, 600);
@@ -61,7 +61,7 @@ public class testTopojson {
 			
 			ArcMap aMap = TopojsonApi.joinCollection(aFeat);
 			
-			Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  14,
+			Topology[][] aRes = TopojsonApi.tileFeatureCollectionToTopojson(aFeat , aMap,  6,
 					"MA");
 
 			aDisplay.setBound(aRes[0][0]._bnd);

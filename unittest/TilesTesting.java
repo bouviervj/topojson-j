@@ -92,6 +92,8 @@ public class TilesTesting implements DisplayListener {
 		_res[_C_N][_C_M].draw(_display);
 		//_res[_C_N][_C_M]._bnd.draw(_display);
 		
+		System.out.println(_res[_C_N][_C_M]._meta_properties.size());
+		
 		_display.render();
 
 	}

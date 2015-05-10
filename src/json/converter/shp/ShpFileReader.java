@@ -266,16 +266,23 @@ public class ShpFileReader {
 			// Here reading record header
 			int aRecordNumber = _stream.readInt();
 			
+			//System.out.println("Record# : "+aRecordNumber);
 			String[] prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null);
+			
+			/*
+			if (prop!=null){
+				for (int i=0; i<_assoc_reader._header.size(); i++) {
+					System.out.print("["+_assoc_reader._header.get(i)+","+prop[i]+"]");
+				}
+				System.out.println();
+			}*/
+			
 			boolean filter = (prop!=null?applyFilter(aRecordNumber,_assoc_reader, aRecordNumber):false);
 			
 			int aRecordSize = _stream.readInt(); // a better implementation will skip those bytes if filter = false
 			
 			if (filter) {
 				
-				//System.out.println("Record# : "+aRecordNumber);
-				//System.out.println("Prop : "+prop);
-
 				int a1 = _stream.available();
 				
 				
@@ -299,9 +306,10 @@ public class ShpFileReader {
 				Feature aFeature = new Feature(aRecordNumber, aReadShape);
 				
 				if (prop!=null) {
-					for (int i=0; i<prop.length; i++) {
+					for (int i=0; i<_assoc_reader._header.size(); i++) {
 						aFeature.addProperty(_assoc_reader._header.get(i), prop[i]);
 					}
+					
 				}
 				
 				_groupRecord._shapes.put(new Integer(aRecordNumber), aFeature);

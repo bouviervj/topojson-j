@@ -116,15 +116,51 @@ public class TopojsonApi {
 		return aMap;
 	}
 	
-	public static Topology[][] tileFeatureCollectionToTopojson(FeatureCollection iCollection, ArcMap iMap, int iZoom, String iTopoName) throws FileNotFoundException{
+	public static Topology featureToTopology(FeatureCollection iCollection, ArcMap iMap, String iTopoName){
 		
-		FeatureCollection aFeat = iCollection;
 		ArcMap aMap = iMap;
 		
+		// this collection have now independent entities
+		// i.e we can change entity leafs without impacting 
+		// other FeatureCollection in the grid
+		
+		FeatureCollection aCollection = (FeatureCollection) iCollection.clone();
+		
+		// arcs gives all arcs we have to draw to get the tile display
+		int[] aArcs = aCollection.arcs();
+		TreeSet<Integer> aSet = new TreeSet<Integer>();
+		for (int aArc:aArcs){
+			aSet.add(aArc);
+		}
+		// gives the unicity
+		
+		// this is the new map to rebuild entity references
+		ArcMap aNewMap = aMap.rebuild(aSet.toArray(new Integer[aSet.size()]));
+		aCollection.rebuildIndexes(aNewMap);
+		
+		// The collection is ready , and also the new map
+		Topology aTopology = new Topology();
+		
+		aTopology.addObject(iTopoName , aCollection.toTopology());
+		
+		aTopology.setArcs(aNewMap);
+		
+		aTopology.setBound(aCollection.getBounding());
+		
+		//if (iKink!=0) aTopology.simplify(iKink); // destructive
+		
+		aTopology._meta_properties = aCollection._meta_properties;
+		
+		return aTopology;
+		
+	}
+	
+	public static Topology[][] tileFeatureCollectionToTopojson(FeatureCollection iCollection, ArcMap iMap, int iZoom, String iTopoName) throws FileNotFoundException{
+				
 		// Here the grid contains feature collections with references 
 		// to same arcs indexes i.e. indexes are not following
 		// All the work consists in rebuilding own arc maps and indexes
-		FeatureCollection[][] aGrid = aFeat.groupGridDivide(iZoom);
+		FeatureCollection[][] aGrid = iCollection.groupGridDivide(iZoom);
 		
 		int iN = aGrid.length;
 		int iM = aGrid[0].length;
@@ -136,36 +172,8 @@ public class TopojsonApi {
 			aResult[i] = new Topology[iM];
 			
 			for (int j=0; j<iM; j++) {
-				
-				// this collection have now independent entities
-				// i.e we can change entity leafs without impacting 
-				// other FeatureCollection in the grid
-				FeatureCollection aCollection = (FeatureCollection) aGrid[i][j].clone();
-				
-				// arcs gives all arcs we have to draw to get the tile display
-				int[] aArcs = aCollection.arcs();
-				TreeSet<Integer> aSet = new TreeSet<Integer>();
-				for (int aArc:aArcs){
-					aSet.add(aArc);
-				}
-				// gives the unicity
-				
-				// this is the new map to rebuild entity references
-				ArcMap aNewMap = aMap.rebuild(aSet.toArray(new Integer[aSet.size()]));
-				aCollection.rebuildIndexes(aNewMap);
-				
-				// The collection is ready , and also the new map
-				Topology aTopology = new Topology();
-				
-				aTopology.addObject(iTopoName , aCollection.toTopology());
-				
-				aTopology.setArcs(aNewMap);
-				
-				aTopology.setBound(aCollection.getBounding());
-				
-				//if (iKink!=0) aTopology.simplify(iKink); // destructive
-				
-				aResult[i][j] = aTopology;
+
+				aResult[i][j] = featureToTopology(aGrid[i][j], iMap,  iTopoName);
 				
 			}
 			
