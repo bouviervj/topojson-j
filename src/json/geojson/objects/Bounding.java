@@ -155,19 +155,14 @@ public class Bounding extends Object  {
 
 	public static Bounding tile2boundingBox(final int x, final int y, final int zoom) {
 	    return new Bounding( tile2lon(x, zoom), tile2lat(y, zoom), tile2lon(x + 1, zoom), tile2lat(y + 1, zoom)  );
-	    /*bb.north = tile2lat(y, zoom);
-	    bb.south = tile2lat(y + 1, zoom);
-	    bb.west = tile2lon(x, zoom);
-	    bb.east = tile2lon(x + 1, zoom);
-	    return bb;*/
 	 }
 
 	@Override
 	public void draw(Display iDisp, Color iColor) {
 		iDisp.drawLine(minx, miny, minx, maxy, iColor);
-		iDisp.drawLine(maxx, miny, minx, maxy, iColor);
-		iDisp.drawLine(maxx, maxy, minx, maxy, iColor);
-		iDisp.drawLine(maxx, maxy, minx, miny, iColor);
+		iDisp.drawLine(minx, maxy, maxx, maxy, iColor);
+		iDisp.drawLine(maxx, maxy, maxx, miny, iColor);
+		iDisp.drawLine(maxx, miny, minx, miny, iColor);
 	}
 	
 	@Override

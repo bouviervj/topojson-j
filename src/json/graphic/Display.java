@@ -22,7 +22,7 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	int _width;
 	int _height;
 	BufferedImage offscreen; 
-	Graphics2D bufferGraphics;
+	public Graphics2D bufferGraphics;
 	Bounding _bound;
 	double sx,sy;
 	

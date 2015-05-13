@@ -75,6 +75,7 @@ public class FeatureCollection extends Shape {
 			public int x;
 			public int y;
 			public int zoom;
+			public FeatureCollection collection;
 			
 			TileElement(int x, int y, int zoom){
 				this.x = x;
@@ -82,68 +83,129 @@ public class FeatureCollection extends Shape {
 				this.zoom = zoom;
 			}
 		
-	}
-	
-	public Vector<TileElement>  dimTiles(int iZoom){
-		
-		Vector<TileElement> aResult  = new Vector<TileElement>();
-		
-		Tile aMinTile = Bounding.getTileNumber(_bnd.miny, /* lon*/_bnd.minx,  iZoom);
-		Tile aMaxTile = Bounding.getTileNumber( _bnd.maxy, /*lon*/_bnd.maxx, iZoom);
-		
-		System.out.println("Max:"+_bnd.maxx+","+_bnd.maxy);
-		System.out.println("Min:"+_bnd.minx+","+_bnd.miny);
-		
-		int aN = aMaxTile.x-aMinTile.x;
-		int aM = aMaxTile.y-aMinTile.y;
-		
-		System.out.println("N:"+aN);
-		System.out.println("M:"+aM);
-		
-		int aSN = aN<0?-1:+1;
-		int aSM = aM<0?-1:+1;
-		
-		aN = Math.abs(aN)+1;
-		aM = Math.abs(aM)+1;
-		
-		FeatureCollection[][] aDividedResult = new FeatureCollection[aN][aM];
-
-		for (int i=0; i<aN; i++) {
-
-			for (int j=0; j<aM; j++) {
-
-				int x = aMinTile.x+aSN*i;
-				int y = aMinTile.y+aSM*j;
-				
-				aResult.add(new TileElement(x,y,iZoom));
-				
-			}	
-		
-		}	
+			public void addCollection(FeatureCollection iCollection){
+				collection = iCollection;
+			}
 			
-		return aResult;
-		
 	}
 	
 	public FeatureCollection processTileElement(TileElement iTileE){
-	
+		
 		FeatureCollection aGroupRecord = new FeatureCollection();
 
 		Bounding aBnd = Bounding.tile2boundingBox(iTileE.x , iTileE.y , iTileE.zoom);
-		aGroupRecord._bnd = aBnd;
+		aGroupRecord._bnd = aBnd; // The bound is defined by the tile
 		
-		//System.out.println(aBnd.toJson());
-
 		for (Entry<Integer,Feature> aERec:_shapes.entrySet()) {
-			if (aERec.getValue().partlyIn(aBnd) /*&& (!aAlreadySelected.contains(aERec.getKey()))*/) {
+			if (aERec.getValue().partlyIn(aBnd)) {
 				aGroupRecord._shapes.put(aERec.getKey(), (Feature) aERec.getValue());
 			}
 		}
 
 		aGroupRecord._meta_properties.put("x", new Integer(iTileE.x));
 		aGroupRecord._meta_properties.put("y", new Integer(iTileE.y));	
-	
+		
 		return aGroupRecord;
+		
+	}
+
+	public Vector<TileElement> dimTile(int iZoom){
+
+		Vector<TileElement> aResult = new Vector<TileElement>();
+		
+		Tile aMinTile = Bounding.getTileNumber(_bnd.miny, /* lon*/_bnd.minx,  iZoom);
+		Tile aMaxTile = Bounding.getTileNumber( _bnd.maxy, /*lon*/_bnd.maxx, iZoom);
+		
+		int aN = aMaxTile.x-aMinTile.x;
+		int aM = aMaxTile.y-aMinTile.y;
+	
+		int aSN = aN<0?-1:+1;
+		int aSM = aM<0?-1:+1;
+		
+		aN = Math.abs(aN)+1;
+		aM = Math.abs(aM)+1;
+		
+		for (int i=0; i<aN; i++) {
+
+			for (int j=0; j<aM; j++) {
+
+				int x = aMinTile.x+aSN*i;
+				int y = aMinTile.y+aSM*j;
+
+				TileElement aTile = new TileElement(x, y, iZoom);
+				
+				FeatureCollection aCollect = processTileElement(aTile);
+				
+				if (aCollect._shapes.size()>0) { // if this area contains at least 1 feature
+					aTile.addCollection(aCollect);
+					aResult.add(aTile);
+				}
+
+			}
+
+		}
+
+		return aResult;
+
+	}
+
+	
+	public Vector<TileElement> div2Tiles(TileElement iTileElement){
+		
+		Vector<TileElement> aResult  = new Vector<TileElement>();
+		
+		Bounding aBnd = Bounding.tile2boundingBox(iTileElement.x, iTileElement.y, iTileElement.zoom);
+		double stepx = (aBnd.maxx-aBnd.minx)/4;
+		double stepy = (aBnd.maxy-aBnd.miny)/4;
+		
+		for (int i=0; i<2; i++){
+			for (int j=0; j<2; j++){
+				
+					double lat = aBnd.miny+(i*2+1)*stepy;
+					double lon = aBnd.minx+(j*2+1)*stepx;
+					
+					Tile aTileN = Bounding.getTileNumber(lat, lon, iTileElement.zoom+1);
+			
+					TileElement aTile = new TileElement(aTileN.x,aTileN.y,aTileN.zoom);
+					
+					FeatureCollection aCollect = processTileElement(aTile);
+					
+					if (aCollect._shapes.size()>0) { // if this area contains at least 1 feature
+						aTile.addCollection(aCollect);
+						aResult.add(aTile);
+					}
+					
+			}
+		}
+						
+		return aResult;
+		
+	}
+	
+	public static abstract class RecursiveTileProcessor {
+		
+		public abstract void process(TileElement aElement);
+		
+	}
+	
+	public static void processRecursiveTiles(TileElement iElem, int iCurrentZoom,  int iMaxZoom, RecursiveTileProcessor iProcessor){
+		
+		if (iCurrentZoom<=iMaxZoom) {
+			Vector<TileElement> aVector = iElem.collection.div2Tiles(iElem);
+			for (TileElement aElem: aVector){
+				iProcessor.process(aElem);
+				processRecursiveTiles( aElem, iCurrentZoom+1,  iMaxZoom, iProcessor);
+			}
+		} 
+		
+	}
+	
+	public static void processTiles(FeatureCollection iFeat, int iCurrentZoom,  int iMaxZoom, RecursiveTileProcessor iProcessor){
+		
+			Vector<TileElement> aVect = iFeat.dimTile(iCurrentZoom);
+			for (TileElement aElem:aVect){
+					processRecursiveTiles(aElem, iCurrentZoom, iMaxZoom,  iProcessor);
+			}
 		
 	}
 	
@@ -152,8 +214,8 @@ public class FeatureCollection extends Shape {
 		Tile aMinTile = Bounding.getTileNumber(_bnd.miny, /* lon*/_bnd.minx,  iZoom);
 		Tile aMaxTile = Bounding.getTileNumber( _bnd.maxy, /*lon*/_bnd.maxx, iZoom);
 		
-		System.out.println("Max:"+_bnd.maxx+","+_bnd.maxy);
-		System.out.println("Min:"+_bnd.minx+","+_bnd.miny);
+		//System.out.println("Max:"+_bnd.maxx+","+_bnd.maxy);
+		//System.out.println("Min:"+_bnd.minx+","+_bnd.miny);
 		
 		int aN = aMaxTile.x-aMinTile.x;
 		int aM = aMaxTile.y-aMinTile.y;

@@ -239,14 +239,14 @@ public class ShpFileReader {
 
 	}
 
-	public boolean  applyFilter(int iRecordNumber, CSVReader iReader, int iRow){
+	public boolean  applyFilter(int iRecordNumber, CSVReader iReader){
 
 		if (_filter!=null) {
 			
 			for (String[] aFilter:_filter) {
 				
 				int aIndex= iReader._header.indexOf(aFilter[0]);
-				String aData = iReader._data.get(iRow)[aIndex];
+				String aData = iReader._data.get(iRecordNumber)[aIndex];
 				if (aData==null) return false;
 				if (!Pattern.matches(aFilter[1], aData)) {
 					return false;
@@ -266,25 +266,18 @@ public class ShpFileReader {
 			// Here reading record header
 			int aRecordNumber = _stream.readInt();
 			
-			//System.out.println("Record# : "+aRecordNumber);
-			String[] prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null);
-			
-			/*
-			if (prop!=null){
-				for (int i=0; i<_assoc_reader._header.size(); i++) {
-					System.out.print("["+_assoc_reader._header.get(i)+","+prop[i]+"]");
-				}
-				System.out.println();
-			}*/
-			
-			boolean filter = (prop!=null?applyFilter(aRecordNumber,_assoc_reader, aRecordNumber):false);
+			// Record# start at 1 and the assoc_reader starts by line 0
+			// The number of records should be aligned
+			// System.out.println("Record# : "+aRecordNumber);
+			String[] prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber-1):null); // -1 to align
+				
+			boolean filter = (prop!=null?applyFilter(aRecordNumber-1,_assoc_reader):false);
 			
 			int aRecordSize = _stream.readInt(); // a better implementation will skip those bytes if filter = false
 			
 			if (filter) {
 				
-				int a1 = _stream.available();
-				
+				//int a1 = _stream.available();
 				
 				byte[] aIBuffer = new byte[4];
 				_stream.read(aIBuffer);
@@ -304,12 +297,12 @@ public class ShpFileReader {
 				//System.out.println("Record # : "+aRecordNumber);
 				
 				Feature aFeature = new Feature(aRecordNumber, aReadShape);
+				aFeature.addProperty("RECORDNUMBER", ""+aRecordNumber);
 				
 				if (prop!=null) {
 					for (int i=0; i<_assoc_reader._header.size(); i++) {
 						aFeature.addProperty(_assoc_reader._header.get(i), prop[i]);
 					}
-					
 				}
 				
 				_groupRecord._shapes.put(new Integer(aRecordNumber), aFeature);

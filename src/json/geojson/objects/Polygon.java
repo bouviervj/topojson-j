@@ -58,7 +58,7 @@ public class Polygon extends Shape {
 	
 	public static Polygon readPolygon(DataInputStream iStream){
 	
-		double Xmin, Ymin, Xmax, Ymax;
+		double Xmin = 0, Ymin = 0, Xmax = 0, Ymax = 0 ;
 		
 		byte[] aIBuffer = new byte[4];
 		byte[] aDBuffer = new byte[8];
@@ -69,28 +69,29 @@ public class Polygon extends Shape {
 
 		try {
 			
+			// skip bounding
 			iStream.read(aDBuffer);
-			Xmin = Toolbox.getDoubleFromByte(aDBuffer);
-			
-			iStream.read(aDBuffer);
-			Ymin = Toolbox.getDoubleFromByte(aDBuffer);
-			
-			Point2D.Double aRes = Toolbox.convertLatLong(Xmin, Ymin);
-			Xmin = aRes.x;
-			Ymin = aRes.y;
-			
+			//Xmin = Toolbox.getDoubleFromByte(aDBuffer);
 			
 			iStream.read(aDBuffer);
-			Xmax = Toolbox.getDoubleFromByte(aDBuffer);
+			//Ymin = Toolbox.getDoubleFromByte(aDBuffer);
+			
+			//Point2D.Double aRes = Toolbox.convertLatLong(Xmin, Ymin);
+			//Xmin = aRes.x;
+			//Ymin = aRes.y;
+			
 			
 			iStream.read(aDBuffer);
-			Ymax = Toolbox.getDoubleFromByte(aDBuffer);
+			//Xmax = Toolbox.getDoubleFromByte(aDBuffer);
+			
+			iStream.read(aDBuffer);
+			//Ymax = Toolbox.getDoubleFromByte(aDBuffer);
 		
-			aRes = Toolbox.convertLatLong(Xmax, Ymax);
-			Xmax = aRes.x;
-			Ymax = aRes.y;
+			//aRes = Toolbox.convertLatLong(Xmax, Ymax);
+			//Xmax = aRes.x;
+			//Ymax = aRes.y;
 			
-			
+			/*
 			double swap;
 			if (Xmin>Xmax) {
 				swap = Xmin;
@@ -102,7 +103,7 @@ public class Polygon extends Shape {
 				swap = Ymin;
 				Ymin = Ymax;
 				Ymax = swap;
-			}
+			}*/
 			
 			iStream.read(aIBuffer);
 			int aNumparts = Toolbox.little2big(aIBuffer);
@@ -118,13 +119,24 @@ public class Polygon extends Shape {
 			}
 			
 			for (int i=0; i<aNumPoints; i++) {
+				
 				points[i] = Point.readPoint(iStream);
+				if (i==0) {
 				
-				if (points[i].x>Xmax) Xmax = points[i].x;
-				if (points[i].x<Xmin) Xmin = points[i].x;
+					Xmax = points[i].x;
+					Ymax = points[i].y;
+					Xmin = points[i].x;
+					Ymin = points[i].y;
 				
-				if (points[i].y>Ymax) Ymax = points[i].y;
-				if (points[i].y<Ymin) Ymin = points[i].y;
+				} else {
+				
+					if (points[i].x>Xmax) Xmax = points[i].x;
+					if (points[i].x<Xmin) Xmin = points[i].x;
+					
+					if (points[i].y>Ymax) Ymax = points[i].y;
+					if (points[i].y<Ymin) Ymin = points[i].y;
+					
+				}
 				
 			}
 			

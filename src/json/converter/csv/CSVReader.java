@@ -96,18 +96,6 @@ public class CSVReader  implements SortedMap<Integer, String[] > {
 						}
 					}
 
-					/*
-					String[] aLine = new String[_header.size()];
-
-					aLine[0] = String.format("%d", count);
-
-					for (int i=0; i<_header.length;i++) {
-						if (i<data.length) {
-							aLine[0] =  data[i].trim() ;
-						}
-					}
-					*/
-
 					_data.put(count,data);
 
 
