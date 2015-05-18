@@ -97,7 +97,7 @@ public class JenksColorifierGeojson extends  Colorifier {
 
 		}
 
-		return new Color(0x00AFAFAF);
+		return new Color( 0xAF/256.0f , 0xAF/256.0f, 0xAF/256.0f, 0.5f );
 	}
 
 }

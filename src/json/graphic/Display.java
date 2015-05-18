@@ -10,6 +10,7 @@ import java.awt.RenderingHints;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import javax.imageio.ImageIO;
@@ -19,6 +20,8 @@ import json.geojson.objects.Bounding;
 
 public class Display extends Canvas implements Runnable, KeyListener {
 
+	JFrame _frame;
+	
 	int _width;
 	int _height;
 	BufferedImage offscreen; 
@@ -27,6 +30,8 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	double sx,sy;
 	
 	DisplayListener _listener;
+	
+	boolean _visible = true;
 	
 	public Display(int iWidth, int iHeight)
 	{
@@ -81,14 +86,24 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	
 	public void init(){
 		
-		JFrame frame = new JFrame();
+		_frame = new JFrame();
 		//frame.setUndecorated(true);
-		frame.setSize(_width, _height);
-		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		frame.getContentPane().add(this);                    
-		frame.setVisible(true);
+		_frame.setSize(_width, _height);
+		_frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		_frame.getContentPane().add(this);                    
+		_frame.setVisible(_visible);
 		
-		frame.addKeyListener(this);
+		_frame.addKeyListener(this);
+	}
+	
+	public void setVisible(){
+		_visible = true;
+		if (_frame!=null)  _frame.setVisible(_visible);
+	}
+	
+	public void hide(){
+		_visible = false;
+		if (_frame!=null)  _frame.setVisible(_visible);
 	}
 
 	public void start(){
@@ -98,9 +113,7 @@ public class Display extends Canvas implements Runnable, KeyListener {
 	
 	public void paint(Graphics graphics)
 	{
-
-		graphics.drawImage(offscreen,0,0,this); 
-
+		if (_visible)  graphics.drawImage(offscreen,0,0,this); 
 	}
 	
 	public void update(Graphics g)
@@ -139,6 +152,21 @@ public class Display extends Canvas implements Runnable, KeyListener {
 		        e.printStackTrace();
 		    }
 	}
+	
+	public byte[] getImageData(){
+		 
+			ByteArrayOutputStream aStream = new ByteArrayOutputStream();
+		
+			try {
+		       ImageIO.write(offscreen, "png", aStream); 
+		    } catch (java.io.IOException e) {
+		        // TODO Auto-generated catch block
+		        e.printStackTrace();
+		    }
+			
+			return aStream.toByteArray();
+	}
+	
 	
 	@Override
 	public void run() {

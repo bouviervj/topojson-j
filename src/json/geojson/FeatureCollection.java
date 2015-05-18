@@ -44,6 +44,7 @@ public class FeatureCollection extends Shape {
 	public FeatureCollection(){
 		_shapes = new TreeMap<Integer,Feature>();
 		_meta_properties = new HashMap<String, java.lang.Object>();
+		
 	}
 
 
@@ -289,7 +290,7 @@ public class FeatureCollection extends Shape {
 	public Bounding getMergedBound(){
 		
 		if (_shapes.size()>0) {
-			Bounding aSt = _shapes.firstEntry().getValue().getBounding();
+			Bounding aSt = _shapes.firstEntry().getValue().getBounding().clone();
 			for (Shape aShape:_shapes.values()) {
 				aSt.merge(aShape.getBounding());
 			}

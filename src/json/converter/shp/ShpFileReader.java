@@ -1,6 +1,7 @@
 package json.converter.shp;
 
 
+import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.io.DataInputStream;
 import java.io.File;
@@ -20,6 +21,8 @@ import json.geojson.FeatureCollection;
 import json.geojson.objects.Bounding;
 import json.geojson.objects.Polygon;
 import json.geojson.objects.Shape;
+import json.graphic.BasicColorifier;
+import json.graphic.Display;
 import json.tools.Toolbox;
 
 
@@ -264,14 +267,14 @@ public class ShpFileReader {
 		try {
 
 			// Here reading record header
-			int aRecordNumber = _stream.readInt();
+			int aRecordNumber = _stream.readInt()-1;
 			
 			// Record# start at 1 and the assoc_reader starts by line 0
 			// The number of records should be aligned
 			// System.out.println("Record# : "+aRecordNumber);
-			String[] prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber-1):null); // -1 to align
+			String[] prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null); // -1 to align
 				
-			boolean filter = (prop!=null?applyFilter(aRecordNumber-1,_assoc_reader):false);
+			boolean filter = (prop!=null?applyFilter(aRecordNumber,_assoc_reader):false);
 			
 			int aRecordSize = _stream.readInt(); // a better implementation will skip those bytes if filter = false
 			
@@ -292,10 +295,7 @@ public class ShpFileReader {
 				}
 				//System.out.println("Pos 2: "+_stream.available());
 				//System.out.println("Readen: "+(a1-_stream.available()));
-				
-				
-				//System.out.println("Record # : "+aRecordNumber);
-				
+					
 				Feature aFeature = new Feature(aRecordNumber, aReadShape);
 				aFeature.addProperty("RECORDNUMBER", ""+aRecordNumber);
 				
