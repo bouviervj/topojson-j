@@ -70,6 +70,11 @@ public class JenksColorifierGeojson extends  Colorifier {
 	};
 
 	@Override
+	public double[] getClasses(){
+		return _ranges;
+	}
+	
+	@Override
 	public Color getColor(java.lang.Object properties) {
 
 		if (properties  instanceof HashMap<?,?>) {

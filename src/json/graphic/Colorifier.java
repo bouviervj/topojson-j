@@ -12,5 +12,6 @@ public abstract class Colorifier {
 	}
 	
 	public abstract Color getColor(Object  properties);
+	public abstract double[] getClasses();
 
 }

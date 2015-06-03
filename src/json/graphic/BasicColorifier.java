@@ -19,6 +19,12 @@ public class BasicColorifier extends Colorifier  {
 		return _color;
 	}
 
+	@Override
+	public double[] getClasses() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 
 }

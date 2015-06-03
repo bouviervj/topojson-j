@@ -115,4 +115,10 @@ public class CensusColorifier extends  Colorifier {
 		return new Color(0x00AFAFAF);
 	}
 
+	@Override
+	public double[] getClasses() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
