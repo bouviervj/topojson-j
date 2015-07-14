@@ -102,7 +102,7 @@ public class ShpFileReader {
 
 			_assoc_reader = aReader;
 
-		}
+		} 
 
 	}
 	
@@ -274,7 +274,7 @@ public class ShpFileReader {
 			// System.out.println("Record# : "+aRecordNumber);
 			String[] prop = (_assoc_reader!=null?_assoc_reader.get(aRecordNumber):null); // -1 to align
 				
-			boolean filter = (prop!=null?applyFilter(aRecordNumber,_assoc_reader):false);
+			boolean filter = (prop!=null?applyFilter(aRecordNumber,_assoc_reader):_assoc_reader!=null?false:true);
 			
 			int aRecordSize = _stream.readInt(); // a better implementation will skip those bytes if filter = false
 			
